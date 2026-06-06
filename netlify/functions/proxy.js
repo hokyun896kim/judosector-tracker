@@ -45,12 +45,23 @@ exports.handler = async (event) => {
 
     // 원본 바이트를 그대로 base64로 전달 → 클라이언트가 EUC-KR/UTF-8 자동 복원
     const buf = Buffer.from(await r.arrayBuffer());
+
+    // 성공 응답만 60초 캐시(반복 로딩·전체 새로고침 가속).
+    // 장 마감 종가 기준으로 쓰므로 60초 캐시는 신선도에 지장 없음. 에러는 캐시 안 함.
+    const ok2xx = r.status >= 200 && r.status < 300;
+    const cacheHeaders = ok2xx
+      ? {
+          'Cache-Control': 'public, max-age=60',
+          'Netlify-CDN-Cache-Control': 'public, durable, s-maxage=60',
+        }
+      : { 'Cache-Control': 'no-store' };
+
     return {
       statusCode: r.status,
       headers: {
         ...cors,
         'Content-Type': r.headers.get('content-type') || 'application/octet-stream',
-        'Cache-Control': 'no-store',
+        ...cacheHeaders,
       },
       body: buf.toString('base64'),
       isBase64Encoded: true,
