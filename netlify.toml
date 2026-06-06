@@ -1,0 +1,7 @@
+# 사이트 루트의 정적 파일을 그대로 게시하고, 서버리스 프록시 함수를 활성화한다.
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"

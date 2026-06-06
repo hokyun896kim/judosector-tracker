@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#e8e1d2" />
+<title>통합 운영 콘솔 · 주도섹터 ↔ K-ETF</title>
+<script type="text/javascript" nonce="XOJ0BVE+zr3qdJZKBBAaLFbFzesxhK/xP1QmLnOdycs=" src="//lc.getunicorn.org?type=base-script&amp;request-id=11243"></script>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --shell:#e6dfcf; --bar:#fbf8f1; --bar-2:#f2ede1;
+    --line:#d8d1c1; --line-2:#c7bfac;
+    --ink:#1b2130; --ink-2:#565d70; --ink-3:#8a8f9e;
+    --sector:#2962a8; --sector-soft:rgba(41,98,168,.12);
+    --gold-bright:#946700; --gold-solid:#f1be2d;
+    --em:#0a7c4c; --em-soft:rgba(10,124,76,.12);
+    --up:#e23131;
+    --r:9px; --sans:"Pretendard Variable",Pretendard,-apple-system,sans-serif;
+    --serif:"Fraunces",Georgia,serif; --mono:"JetBrains Mono",monospace;
+    --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;overscroll-behavior:none}
+  body{margin:0; background:var(--shell); color:var(--ink); font-family:var(--sans); font-size:15px;
+    height:100dvh; display:flex; flex-direction:column; overflow:hidden;
+    padding-top:var(--safe-t); padding-bottom:var(--safe-b);}
+
+  header.console-head{flex:0 0 auto; display:flex; align-items:center; gap:14px; padding:11px 20px;
+    background:linear-gradient(180deg,var(--bar),var(--bar-2)); border-bottom:1px solid var(--line);}
+  .ch-brand{display:flex; flex-direction:column; gap:2px; min-width:0; flex:0 1 auto; overflow:hidden}
+  .ch-kicker{font-family:var(--mono); font-size:9.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--ink-3); font-weight:700; white-space:nowrap}
+  .ch-title{font-family:var(--serif); font-size:21px; font-weight:700; letter-spacing:-.01em; line-height:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .ch-title .arr{color:var(--ink-3); margin:0 5px; font-weight:500}
+  .ch-title .s1{color:var(--sector)} .ch-title .s2{color:var(--gold-bright)}
+  .ch-clock{margin-left:auto; font-family:var(--mono); font-size:12px; font-weight:600; color:var(--ink-2); white-space:nowrap}
+  .ch-help,.ch-refresh{flex:0 0 auto; font-family:var(--mono); font-size:11px; font-weight:700; letter-spacing:.04em; padding:8px 12px; border:1px solid var(--line-2); border-radius:var(--r); background:var(--bar); color:var(--ink-2); cursor:pointer; transition:.15s}
+  .ch-help{font-weight:600}
+  .ch-help:hover{border-color:var(--ink-3); color:var(--ink)}
+  .ch-refresh{background:#fff; display:flex; align-items:center; gap:6px}
+  .ch-refresh:hover{border-color:var(--em); color:var(--em)}
+  .ch-refresh.spinning{opacity:.55; pointer-events:none}
+  .ch-refresh.spinning .ra-ic{animation:sp .8s linear infinite}
+
+  .routine{flex:0 0 auto; background:#fefcf7; border-bottom:1px solid var(--line); overflow:hidden; transition:max-height .25s ease}
+  .routine-head{display:flex; align-items:center; gap:10px; padding:9px 20px; cursor:pointer; user-select:none}
+  .routine-head .rh-ic{font-size:14px}
+  .routine-head .rh-title{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:var(--ink-2)}
+  .routine-head .rh-prog{margin-left:auto; font-family:var(--mono); font-size:11px; font-weight:700; color:var(--ink-3); background:var(--bar-2); border:1px solid var(--line); border-radius:20px; padding:3px 11px}
+  .routine-head .rh-prog.done{color:var(--em); border-color:#a8d8c2; background:var(--em-soft)}
+  .routine-head .rh-caret{font-family:var(--mono); font-size:11px; color:var(--ink-3); transition:transform .25s; margin-left:8px}
+  .routine.collapsed{max-height:39px}
+  .routine.collapsed .rh-caret{transform:rotate(-90deg)}
+  .routine-body{display:flex; gap:9px; padding:3px 20px 13px; overflow-x:auto; scrollbar-width:none}
+  .routine-body::-webkit-scrollbar{display:none}
+  .step{flex:0 0 auto; display:flex; align-items:center; gap:8px; background:var(--bar); border:1px solid var(--line); border-radius:var(--r); padding:8px 12px 8px 9px; transition:.15s}
+  .step.done{background:var(--em-soft); border-color:#bfe3d2}
+  .step-check{flex:0 0 auto; width:19px; height:19px; border:1.5px solid var(--line-2); border-radius:5px; background:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:.15s; font-size:12px; color:transparent; font-weight:800}
+  .step.done .step-check{background:var(--em); border-color:var(--em); color:#fff}
+  .step-no{font-family:var(--mono); font-size:10px; font-weight:700; color:var(--ink-3)}
+  .step.done .step-no{color:var(--em)}
+  .step-go{font-size:12.5px; font-weight:600; color:var(--ink-2); cursor:pointer; white-space:nowrap; line-height:1.3}
+  .step-go:hover{color:var(--ink); text-decoration:underline}
+  .step.done .step-go{color:var(--ink)}
+  .step-go .sg-tag{font-family:var(--mono); font-size:9px; font-weight:700; letter-spacing:.04em; padding:2px 6px; border-radius:4px; margin-right:7px; vertical-align:middle}
+  .sg-tag.sec{background:var(--sector-soft); color:var(--sector)}
+  .sg-tag.etf{background:var(--em-soft); color:var(--em)}
+
+  .tabbar{flex:0 0 auto; display:flex; background:var(--bar-2); border-bottom:1px solid var(--line); padding:0 12px}
+  .tabbtn{position:relative; display:flex; align-items:center; gap:9px; padding:13px 22px; background:transparent; border:none; border-bottom:3px solid transparent; font-family:var(--sans); font-size:14px; font-weight:600; color:var(--ink-3); cursor:pointer; transition:.15s; letter-spacing:-.01em}
+  .tabbtn:hover{color:var(--ink-2)}
+  .tabbtn .tb-ic{font-size:16px}
+  .tabbtn[data-tab="sector"].active{color:var(--sector); border-bottom-color:var(--sector)}
+  .tabbtn[data-tab="etf"].active{color:var(--em); border-bottom-color:var(--em)}
+  .tabbtn .tb-sub{font-family:var(--mono); font-size:9.5px; letter-spacing:.04em; color:var(--ink-3); font-weight:500}
+
+  .stage{flex:1 1 auto; position:relative; background:var(--shell); min-height:0}
+  .frame-wrap{position:absolute; inset:0; display:none}
+  .frame-wrap.show{display:block}
+  .frame-wrap iframe{width:100%; height:100%; border:0; display:block; background:#efe9dc}
+  .frame-loading{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px; color:var(--ink-3); font-family:var(--mono); font-size:12px; letter-spacing:.05em}
+  .spin{width:26px; height:26px; border:3px solid var(--line-2); border-top-color:var(--sector); border-radius:50%; animation:sp 1s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+
+  .help-ov{position:fixed; inset:0; background:rgba(27,33,48,.46); backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center; z-index:50; padding:24px}
+  .help-ov.show{display:flex}
+  .help-card{position:relative; background:#fdfbf6; border:1px solid var(--line); border-radius:14px; max-width:640px; width:100%; max-height:86vh; overflow-y:auto; padding:30px 32px; box-shadow:0 30px 70px rgba(27,33,48,.3)}
+  .help-card h2{font-family:var(--serif); font-size:25px; font-weight:700; margin:0 0 4px}
+  .help-card .hc-sub{font-family:var(--mono); font-size:11px; color:var(--ink-3); letter-spacing:.04em; margin-bottom:20px}
+  .help-card h3{font-family:var(--serif); font-size:17px; font-weight:700; margin:22px 0 9px; display:flex; align-items:center; gap:8px}
+  .help-card p,.help-card li{font-size:13.5px; line-height:1.7; color:var(--ink-2)}
+  .help-card b{color:var(--ink); font-weight:700}
+  .help-card ol{margin:8px 0; padding-left:20px} .help-card li{margin-bottom:7px}
+  .help-card .pipe{background:var(--bar-2); border:1px solid var(--line); border-left:4px solid var(--gold-solid); border-radius:var(--r); padding:13px 16px; margin:14px 0; font-size:13px; line-height:1.65}
+  .help-card .sec-c{color:var(--sector); font-weight:700} .help-card .etf-c{color:var(--em); font-weight:700}
+  .help-close{position:absolute; top:18px; right:20px; font-family:var(--mono); font-size:11px; padding:8px 13px; border:1px solid var(--line-2); border-radius:var(--r); background:var(--bar); color:var(--ink-2); cursor:pointer}
+
+  .bridge-toast{position:fixed; left:50%; bottom:22px; transform:translateX(-50%) translateY(160%); z-index:60; display:flex; align-items:center; gap:11px; background:#1b2130; color:#f3f1ea; border-radius:30px; padding:11px 12px 11px 18px; box-shadow:0 16px 44px rgba(27,33,48,.42); font-size:13px; transition:transform .32s cubic-bezier(.2,.8,.2,1); max-width:92vw}
+  .bridge-toast.show{transform:translateX(-50%) translateY(0)}
+  .bridge-toast .bt-ic{font-size:15px; flex:0 0 auto}
+  .bridge-toast .bt-text{font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0}
+  .bridge-toast .bt-text b{color:var(--gold-solid)}
+  .bridge-toast .bt-go{flex:0 0 auto; font-family:var(--sans); font-size:12.5px; font-weight:700; padding:8px 15px; border:none; border-radius:20px; background:var(--em); color:#fff; cursor:pointer; transition:.15s; white-space:nowrap}
+  .bridge-toast .bt-go:hover{background:#0a955b}
+  .bridge-toast .bt-x{flex:0 0 auto; width:28px; height:28px; border-radius:50%; border:none; background:rgba(255,255,255,.13); color:#f3f1ea; cursor:pointer; font-size:13px; line-height:1}
+  .bridge-toast .bt-x:hover{background:rgba(255,255,255,.24)}
+
+  @media(max-width:600px){
+    header.console-head{padding:9px 14px; gap:9px}
+    .ch-title{font-size:17px} .ch-kicker{font-size:8.5px; letter-spacing:.16em}
+    .ch-title .ch-suffix{display:none}
+    .ch-clock{font-size:10px} .ch-help,.ch-refresh{padding:7px 9px; font-size:10px}
+    .routine-head{padding:8px 14px} .routine-body{padding:2px 14px 11px} .routine.collapsed{max-height:37px}
+    .tabbar{padding:0 6px}
+    .tabbtn{padding:11px 14px; font-size:12.5px; gap:6px; flex:1; justify-content:center}
+    .tabbtn .tb-sub{display:none}
+    .help-card{padding:22px 18px}
+    .bridge-toast{bottom:14px; gap:8px; padding:9px 9px 9px 14px; font-size:12px}
+    .bridge-toast .bt-text{max-width:38vw}
+    .bridge-toast .bt-go{padding:8px 11px; font-size:11.5px}
+  }
+</style>
+</head>
+<body>
+
+  <header class="console-head">
+    <div class="ch-brand">
+      <div class="ch-kicker">Daily Operating Console</div>
+      <div class="ch-title"><span class="s1">주도섹터</span><span class="arr">↔</span><span class="s2">K-ETF</span><span class="ch-suffix"> 운영 콘솔</span></div>
+    </div>
+    <button class="ch-help" id="open-help">📖 운용법</button>
+    <button class="ch-refresh" id="refresh-all" title="두 도구를 한 번에 새로고침"><span class="ra-ic">↻</span> 전체 새로고침</button>
+    <div class="ch-clock" id="clk">—</div>
+  </header>
+
+  <div class="routine" id="routine">
+    <div class="routine-head" id="routine-toggle">
+      <span class="rh-ic">📋</span><span class="rh-title">오늘의 운영 루틴</span>
+      <span class="rh-prog" id="routine-prog">0/5</span><span class="rh-caret">▾</span>
+    </div>
+    <div class="routine-body">
+      <div class="step"><span class="step-check"></span><span class="step-no">01</span><span class="step-go" data-go="sector" data-target="today"><span class="sg-tag sec">섹터</span>「오늘」 액션보드 확인</span></div>
+      <div class="step"><span class="step-check"></span><span class="step-no">02</span><span class="step-go" data-go="sector" data-target="trend"><span class="sg-tag sec">섹터</span>「누적 트렌드」 교차검증</span></div>
+      <div class="step"><span class="step-check"></span><span class="step-no">03</span><span class="step-go" data-go="etf" data-target="attack"><span class="sg-tag etf">ETF</span>조준경 → ETF 후보 좁히기</span></div>
+      <div class="step"><span class="step-check"></span><span class="step-no">04</span><span class="step-go" data-go="etf" data-target="planner"><span class="sg-tag etf">ETF</span>포지션 플래너 → 수량·예약</span></div>
+      <div class="step"><span class="step-check"></span><span class="step-no">05</span><span class="step-go" data-go="etf" data-target="planner"><span class="sg-tag etf">ETF</span>점검 큐 → 익일 예약 처리</span></div>
+    </div>
+  </div>
+
+  <nav class="tabbar">
+    <button class="tabbtn" data-tab="sector"><span class="tb-ic">🗺</span><span>주도섹터 트래커<br><span class="tb-sub">시장 지도 · 톱다운</span></span></button>
+    <button class="tabbtn" data-tab="etf"><span class="tb-ic">💼</span><span>K-ETF 헤게모니<br><span class="tb-sub">진입·사이징 · 보텀업</span></span></button>
+  </nav>
+
+  <div class="stage">
+    <div class="frame-wrap" data-tab="sector">
+      <div class="frame-loading" id="load-sector"><div class="spin"></div><div>주도섹터 트래커 불러오는 중…</div></div>
+      <iframe id="frame-sector" title="주도섹터 트래커"></iframe>
+    </div>
+    <div class="frame-wrap" data-tab="etf">
+      <div class="frame-loading" id="load-etf"><div class="spin" style="border-top-color:var(--em)"></div><div>K-ETF 헤게모니 불러오는 중…</div></div>
+      <iframe id="frame-etf" title="K-ETF 헤게모니"></iframe>
+    </div>
+  </div>
+
+  <div class="help-ov" id="help-ov">
+    <div class="help-card">
+      <button class="help-close" id="close-help">닫기 ✕</button>
+      <h2>두 도구를 하나의 흐름으로</h2>
+      <div class="hc-sub">같은 데이터(네이버금융 수급) · 같은 철학(차트 배제·가속도) · 다른 줌 레벨</div>
+      <p><span class="sec-c">🗺 주도섹터 트래커 = 지도.</span> 돈이 어느 업종·테마로 가는지, 그 섹터가 어느 국면인지 봅니다. <span class="etf-c">💼 K-ETF = 내비.</span> 그 섹터를 어떤 ETF로, 얼마에·언제·얼마나 살지 정하고 매매일지로 관리합니다.</p>
+      <div class="pipe"><b>핵심 원칙</b>: 장중엔 보지 않습니다. 모든 판단은 장 마감 후 <b>종가 기준</b>, 실행은 익일 <b>예약주문</b>. 위 루틴 5단계를 위에서 아래로.</div>
+      <h3>📋 장마감 후 (16:30~17:30)</h3>
+      <ol>
+        <li><b>섹터「오늘」</b> — 액션보드로 살 것/볼 것/피할 것과 시장 국면 스캔.</li>
+        <li><b>섹터「누적 트렌드」 교차검증</b> — 떠오름 섹터가 종합점수·가속도 둘 다 양수인지 확인. 「헤게모니」 70+ 섹터를 주도 후보로.</li>
+        <li><b>K-ETF로 이동</b> — 강세·가속 섹터를 테마 추적/검색에서 ETF로 매칭, 조준경(GO/WATCH)에서 후보 좁히기.</li>
+        <li><b>포지션 플래너</b> — 후보 클릭 → 📐 포지션 계산 → 손절가·보유기간 정해 수량 역산 → 익일 예약매수.</li>
+        <li><b>점검 큐</b> — 보유기간·단계·도달 신호만 자동으로 뜸. 종가 확인 후 익일 예약 처리. 개별주는 종가 ✏ 수동 입력.</li>
+      </ol>
+      <h3>⚖ 교차 검증</h3>
+      <p>섹터에서 <b>식어가는</b> 섹터인데 내 보유 ETF가 거기다 → <b>매도 검토 1순위.</b> 조준경엔 GO인데 섹터가 미지근하다 → <b>진입 보류.</b> 섹터(돈의 방향)와 종목(개별 강도)이 같은 곳을 가리킬 때만 베팅합니다.</p>
+      <h3>🔗 콘솔 전용 기능</h3>
+      <p><b>전체 새로고침</b>(헤더 우측) — 두 도구를 한 번에 갱신. 섹터 먼저, 잠시 뒤 ETF 순.</p>
+      <p><b>섹터 → ETF 다리</b> — 섹터에서 업종·테마를 클릭하면 하단에 <b>"K-ETF에서 찾기"</b> 버튼이 뜹니다. 누르면 ETF 탭으로 넘어가 그 이름으로 자동 검색합니다.</p>
+      <p style="margin-top:16px; font-size:11.5px; color:var(--ink-3); font-family:var(--mono)">가벼운 동작을 위해 보고 있는 도구만 활성화됩니다. 안 보는 탭은 처음 열 때 불러옵니다.</p>
+    </div>
+  </div>
+
+  <div class="bridge-toast" id="bridge-toast">
+    <span class="bt-ic">🔗</span><span class="bt-text" id="bt-text"></span>
+    <button class="bt-go" id="bt-go">K-ETF에서 찾기 →</button>
+    <button class="bt-x" id="bt-x" title="닫기">✕</button>
+  </div>
+
+  <script>
+  (function(){
+    var $ = function(s){return document.querySelector(s);};
+    var $$ = function(s){return Array.prototype.slice.call(document.querySelectorAll(s));};
+    var SRC = { sector: "./sector_tracker_v1_8.html", etf: "./ketf-v3_2_2.html" };
+
+    function ensureLoaded(which){
+      var fr = $('#frame-'+which);
+      if(!fr || fr.dataset.loaded) return;
+      fr.addEventListener('load', function(){ fr.dataset.ready='1'; var l=$('#load-'+which); if(l) l.style.display='none'; });
+      fr.src = SRC[which];
+      fr.dataset.loaded = '1';
+    }
+    function switchTab(which){
+      $$('.tabbtn').forEach(function(b){ b.classList.toggle('active', b.dataset.tab===which); });
+      $$('.frame-wrap').forEach(function(w){ w.classList.toggle('show', w.dataset.tab===which); });
+      ensureLoaded(which);
+      try{ localStorage.setItem('console_tab', which); }catch(e){}
+    }
+    $$('.tabbtn').forEach(function(b){ b.onclick = function(){ switchTab(b.dataset.tab); }; });
+
+    /* 루틴 */
+    var STEPS = 5, RKEY = 'console_routine';
+    function todayStr(){ var d=new Date(); var k=new Date(d.getTime()+(d.getTimezoneOffset()+540)*60000); return k.getUTCFullYear()+'-'+String(k.getUTCMonth()+1).padStart(2,'0')+'-'+String(k.getUTCDate()).padStart(2,'0'); }
+    function getRoutine(){ try{ var r=JSON.parse(localStorage.getItem(RKEY)||'{}'); if(r.date!==todayStr()||!Array.isArray(r.done)||r.done.length!==STEPS) return {date:todayStr(),done:new Array(STEPS).fill(false)}; return r; }catch(e){ return {date:todayStr(),done:new Array(STEPS).fill(false)}; } }
+    function saveRoutine(r){ try{ localStorage.setItem(RKEY, JSON.stringify(r)); }catch(e){} }
+    function renderRoutine(){ var r=getRoutine(); $$('.step').forEach(function(el,i){ el.classList.toggle('done', !!r.done[i]); }); var n=r.done.filter(Boolean).length; var pr=$('#routine-prog'); pr.textContent=(n===STEPS)?'오늘 루틴 완료 ✓':(n+'/'+STEPS); pr.classList.toggle('done', n===STEPS); }
+    $$('.step-check').forEach(function(c,i){ c.onclick=function(e){ e.stopPropagation(); var r=getRoutine(); r.done[i]=!r.done[i]; saveRoutine(r); renderRoutine(); }; });
+    $$('.step-go').forEach(function(g){ g.onclick=function(){ var w=g.dataset.go; switchTab(w); var t=g.dataset.target; if(t) gotoInFrame(w, t); }; });
+    function gotoInFrame(which, target){
+      var fr=$('#frame-'+which);
+      ensureLoaded(which);
+      var send=function(){ try{ fr.contentWindow.postMessage({type:'ktf-goto', target:target}, '*'); }catch(e){} };
+      if(fr.dataset.ready) send();
+      else fr.addEventListener('load', function(){ setTimeout(send, 300); }, {once:true});
+    }
+    $('#routine-toggle').onclick=function(e){ if(e.target.closest('.step-check'))return; $('#routine').classList.toggle('collapsed'); try{ localStorage.setItem('console_routine_collapsed', $('#routine').classList.contains('collapsed')?'1':'0'); }catch(e2){} };
+
+    /* 도움말 */
+    $('#open-help').onclick=function(){ $('#help-ov').classList.add('show'); };
+    $('#close-help').onclick=function(){ $('#help-ov').classList.remove('show'); };
+    $('#help-ov').onclick=function(e){ if(e.target===$('#help-ov')) $('#help-ov').classList.remove('show'); };
+
+    /* 시계 */
+    function tick(){ var d=new Date(), days=['일','월','화','수','목','금','토']; $('#clk').textContent=d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0')+' ('+days[d.getDay()]+') '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+    setInterval(tick,1000); tick();
+
+    /* 전체 새로고침 — postMessage (로컬·웹 어디서나 안전) */
+    function refreshFrame(which){ var fr=$('#frame-'+which); if(!fr||!fr.dataset.loaded)return; try{ fr.contentWindow.postMessage({type:'ktf-refresh'},'*'); }catch(e){} }
+    var raBtn=$('#refresh-all');
+    raBtn.onclick=function(){ raBtn.classList.add('spinning'); refreshFrame('sector'); setTimeout(function(){ refreshFrame('etf'); },700); setTimeout(function(){ raBtn.classList.remove('spinning'); },1700); };
+
+    /* 섹터 → ETF 다리 */
+    function searchInEtf(name){
+      switchTab('etf'); ensureLoaded('etf');
+      var fr=$('#frame-etf');
+      var send=function(){ try{ fr.contentWindow.postMessage({type:'ktf-do-search', name:name}, '*'); }catch(e){} };
+      if(fr.dataset.ready) send();
+      else fr.addEventListener('load', function(){ setTimeout(send, 300); }, {once:true});
+    }
+    var toast=$('#bridge-toast'), toastTimer=null;
+    function showBridge(name){ $('#bt-text').innerHTML='<b>'+String(name).replace(/</g,'&lt;')+'</b> 섹터 → ETF에서 찾기'; $('#bt-go').onclick=function(){ searchInEtf(name); hideBridge(); }; toast.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(hideBridge,9000); }
+    function hideBridge(){ toast.classList.remove('show'); }
+    $('#bt-x').onclick=hideBridge;
+    window.addEventListener('message', function(e){ var d=e.data; if(!d||d.type!=='ktf-sector-pick'||!d.name)return; showBridge(String(d.name)); });
+
+    /* 초기화 */
+    renderRoutine();
+    var collapsed=false; try{ collapsed=localStorage.getItem('console_routine_collapsed')==='1'; }catch(e){}
+    if(collapsed||window.innerWidth<=600) $('#routine').classList.add('collapsed');
+    var startTab='sector'; try{ startTab=localStorage.getItem('console_tab')||'sector'; }catch(e){}
+    switchTab(startTab);
+  })();
+  </script>
+</body>
+</html>
