@@ -101,6 +101,14 @@
   .pk-stk em{font-style:normal; font-family:var(--mono); font-size:10px; font-weight:700}
   .pk-stk.up em{color:#d62828}
   .pk-stk.down em{color:#1769d1}
+  .pk-share{margin-left:auto; font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:.03em; color:var(--ink-2); background:var(--bar); border:1px solid var(--line); border-radius:6px; padding:4px 9px; cursor:pointer; transition:.13s}
+  .pk-share:hover{border-color:var(--ink-3); color:var(--ink)}
+  .pk-new{font-family:var(--mono); font-size:8.5px; font-weight:800; letter-spacing:.05em; color:#fff; background:#d62828; border-radius:3px; padding:1px 4px; margin-left:1px}
+  .pk-out{font-size:10.5px; color:var(--ink-3); font-family:var(--mono); padding:4px 2px 0 24px}
+  .pk-etfmatch{display:flex; flex-wrap:wrap; gap:5px; padding:1px 2px 2px 24px}
+  .pk-etfm{display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; color:var(--em); background:var(--em-soft); border:1px solid transparent; border-radius:10px; padding:2px 9px 2px 4px; cursor:pointer; font-family:var(--sans); transition:.12s}
+  .pk-etfm:hover{border-color:var(--em)}
+  .pk-etfm-tag{font-family:var(--mono); font-size:8px; font-weight:800; letter-spacing:.04em; color:#fff; background:var(--em); border-radius:3px; padding:1px 4px}
   .pick-col[data-col="sector"] .pk-col-h{color:var(--sector)}
   .pick-col[data-col="etf"] .pk-col-h{color:var(--em)}
 
@@ -190,6 +198,7 @@
     <div class="pick-head" id="pick-toggle">
       <span class="pk-ic">🎯</span><span class="pk-title">오늘의 콕 추천</span>
       <span class="pk-note">신호 요약 · 진입 전 손절·수량은 직접 계산</span>
+      <button class="pk-share" id="pick-share" title="오늘의 콕 추천을 이미지로 저장/공유">🖼 카드</button>
       <span class="pk-caret">▾</span>
     </div>
     <div class="pick-body">
@@ -319,6 +328,17 @@
     /* 오늘의 콕 추천 패널 */
     function esc(s){ return String(s==null?'':s).replace(/[<>&]/g, function(m){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[m];}); }
     function gradeCls(g){ var c=(g||'').trim().charAt(0); if(c==='S')return 's'; if(c==='A')return 'a'; if(c==='B')return 'b'; return 'b'; }
+    function dayKey(){ var d=new Date(),z=function(n){return (n<10?'0':'')+n;}; return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate()); }
+    /* 변화 감지(NEW/OUT) — 날짜별 추천 이름 기록 */
+    var PK_HIST='console_picks_hist_v1';
+    function loadHist(){ try{ return JSON.parse(localStorage.getItem(PK_HIST)||'{}'); }catch(e){ return {}; } }
+    function saveHist(h){ try{ localStorage.setItem(PK_HIST, JSON.stringify(h)); }catch(e){} }
+    function priorNames(cat){ var h=loadHist(),k=dayKey(); var ks=Object.keys(h).filter(function(d){return d<k && h[d] && h[d][cat] && h[d][cat].length;}).sort(); return ks.length? h[ks[ks.length-1]][cat] : null; }
+    function histUpdate(cat,names){ var h=loadHist(),k=dayKey(); h[k]=h[k]||{}; h[k][cat]=names; var ks=Object.keys(h).sort(); if(ks.length>120) ks.slice(0,ks.length-120).forEach(function(d){delete h[d];}); saveHist(h); }
+    function outLine(cat,currentNames){ var prior=priorNames(cat); if(!prior) return ''; var cur={}; currentNames.forEach(function(n){cur[n]=1;}); var dropped=prior.filter(function(n){return !cur[n];}); if(!dropped.length) return ''; return '<div class="pk-out">⤵ 어제 빠짐: '+dropped.map(esc).join(' · ')+'</div>'; }
+
+    var lastSectorPicks=null, lastSectorNames=[], etfMatches={}, lastEtfGo=null, lastEtfWatch=null;
+
     function bindRows(box, which, target){
       Array.prototype.slice.call(box.querySelectorAll('.pk-row')).forEach(function(el){
         el.onclick=function(){ switchTab(which); gotoInFrame(which, target); };
@@ -334,50 +354,146 @@
           +esc(s.name)+' <em>'+esc(sign)+'</em></a>';
       }).join('')+'</div>';
     }
+    function etfMatchChips(name){
+      var arr=etfMatches[name]; if(!arr||!arr.length) return '';
+      return '<div class="pk-etfmatch">'+arr.map(function(e){
+        return '<button class="pk-etfm" data-name="'+esc(e.name)+'" title="이 ETF로 매매 — 클릭 시 ETF 상세">'
+          +'<span class="pk-etfm-tag">ETF</span>'+esc(e.name)+'</button>';
+      }).join('')+'</div>';
+    }
+    function newBadge(on){ return on?'<span class="pk-new">NEW</span>':''; }
     function renderSectorPicks(picks){
       var box=$('#pk-sector'); if(!box) return;
-      if(!picks || !picks.length){ box.innerHTML='<div class="pk-empty">오늘은 조건 충족 후보 없음</div>'; return; }
+      lastSectorPicks=picks||[];
+      if(!picks || !picks.length){ box.innerHTML='<div class="pk-empty">오늘은 조건 충족 후보 없음</div>'; lastSectorNames=[]; histUpdate('sector',[]); return; }
+      var names=picks.map(function(p){return p.name;}); lastSectorNames=names;
+      var prior=priorNames('sector'), pset={}; if(prior) prior.forEach(function(n){pset[n]=1;});
       box.innerHTML = picks.map(function(p,i){
         var g=(p.grade||'').trim().charAt(0)||'·';
+        var isNew = prior ? !pset[p.name] : false;
         return '<div class="pk-item">'
           +'<button class="pk-row" data-go="sector">'
           +'<span class="pk-rank">'+(i+1)+'</span>'
           +'<span class="pk-grade '+gradeCls(p.grade)+'">'+esc(g)+'</span>'
           +'<span class="pk-name">'+esc(p.name)+'</span>'
+          +newBadge(isNew)
           +'<span class="pk-score">'+(p.em!=null?p.em:'')+'</span>'
           +'</button>'
           +stockChips(p.stocks)
+          +etfMatchChips(p.name)
           +'</div>';
-      }).join('');
+      }).join('') + outLine('sector',names);
       bindRows(box,'sector','today');
+      Array.prototype.slice.call(box.querySelectorAll('.pk-etfm')).forEach(function(el){
+        el.onclick=function(ev){ ev.stopPropagation(); searchInEtf(el.dataset.name); };
+      });
+      histUpdate('sector',names);
     }
-    function etfRow(p,i){
+    function etfRow(p,i,isNew){
       return '<button class="pk-row" data-go="etf">'
         +'<span class="pk-rank">'+(i+1)+'</span>'
         +'<span class="pk-name">'+esc(p.name)+'</span>'
+        +newBadge(isNew)
         +(p.phase?'<span class="pk-phase">'+esc(p.phase)+'</span>':'')
         +'<span class="pk-score">'+(p.score!=null?p.score:'')+'</span>'
         +'</button>';
     }
     function renderEtfPicks(go, watch){
       var box=$('#pk-etf'); if(!box) return;
-      if(go && go.length){
-        box.innerHTML = go.map(function(p,i){ return etfRow(p,i); }).join('');
-        bindRows(box,'etf','attack'); return;
-      }
-      if(watch && watch.length){
-        box.innerHTML = '<div class="pk-empty" style="padding:4px 2px">GO 없음 · 관망(WATCH)</div>'
-          + watch.map(function(p,i){ return etfRow(p,i); }).join('');
-        bindRows(box,'etf','attack'); return;
-      }
-      box.innerHTML='<div class="pk-empty">오늘은 진입 GO 후보 없음</div>';
+      lastEtfGo=go||[]; lastEtfWatch=watch||[];
+      var list=(go&&go.length)?go:((watch&&watch.length)?watch:[]);
+      if(!list.length){ box.innerHTML='<div class="pk-empty">오늘은 진입 GO 후보 없음</div>'; histUpdate('etf',[]); return; }
+      var names=list.map(function(p){return p.name;});
+      var prior=priorNames('etf'), pset={}; if(prior) prior.forEach(function(n){pset[n]=1;});
+      var head=(go&&go.length)?'':'<div class="pk-empty" style="padding:4px 2px">GO 없음 · 관망(WATCH)</div>';
+      box.innerHTML = head + list.map(function(p,i){ return etfRow(p,i, prior?!pset[p.name]:false); }).join('') + outLine('etf',names);
+      bindRows(box,'etf','attack');
+      histUpdate('etf',names);
+    }
+    function requestEtfMatches(){
+      if(!lastSectorNames.length) return;
+      var fr=$('#frame-etf'); if(!fr||!fr.dataset.loaded||!fr.contentWindow) return;
+      try{ fr.contentWindow.postMessage({type:'console-match-etf', names:lastSectorNames}, '*'); }catch(e){}
     }
     window.addEventListener('message', function(e){
       var d=e.data; if(!d) return;
-      if(d.type==='console-sector-picks') renderSectorPicks(d.picks);
-      else if(d.type==='console-etf-picks') renderEtfPicks(d.go, d.watch);
+      if(d.type==='console-sector-picks'){ renderSectorPicks(d.picks); requestEtfMatches(); }
+      else if(d.type==='console-etf-picks'){ renderEtfPicks(d.go, d.watch); requestEtfMatches(); }
+      else if(d.type==='console-etf-matches'){ etfMatches=d.matches||{}; if(lastSectorPicks && lastSectorPicks.length) renderSectorPicks(lastSectorPicks); }
     });
-    $('#pick-toggle').onclick=function(){ $('#pick-panel').classList.toggle('collapsed'); try{ localStorage.setItem('console_pick_collapsed', $('#pick-panel').classList.contains('collapsed')?'1':'0'); }catch(e){} };
+    $('#pick-toggle').onclick=function(e){ if(e.target.closest('#pick-share'))return; $('#pick-panel').classList.toggle('collapsed'); try{ localStorage.setItem('console_pick_collapsed', $('#pick-panel').classList.contains('collapsed')?'1':'0'); }catch(e2){} };
+
+    /* 콕 추천 카드 → 이미지 저장/공유 (외부 라이브러리 없이 canvas 직접 렌더) */
+    function drawSection(ctx,P,W,y,kind){
+      var accent = kind==='sector' ? '#b5852a' : '#1f8a5b';
+      var title = kind==='sector' ? '섹터 · 지금 살 후보 (S·A)' : 'ETF · 진입 조준경 (GO)';
+      ctx.fillStyle=accent; ctx.fillRect(P, y-11, 4, 15);
+      ctx.fillStyle=accent; ctx.font='700 14px sans-serif'; ctx.fillText(title, P+12, y); y+=24;
+      if(kind==='sector'){
+        var picks=lastSectorPicks||[];
+        if(!picks.length){ ctx.fillStyle='#9aa3b2'; ctx.font='500 12px sans-serif'; ctx.fillText('오늘은 조건 충족 후보 없음', P+4, y); return y+16; }
+        picks.forEach(function(p,i){
+          ctx.fillStyle='#9aa3b2'; ctx.font='700 11px monospace'; ctx.textAlign='left'; ctx.fillText(String(i+1), P+2, y);
+          var g=(p.grade||'').trim().charAt(0)||'·';
+          ctx.fillStyle = g==='S'?'#1f8a5b':(g==='A'?'#d6efe2':'#f1e3c4'); ctx.fillRect(P+16, y-12, 16, 16);
+          ctx.fillStyle = g==='S'?'#fff':(g==='A'?'#1f8a5b':'#b5852a'); ctx.font='800 10px sans-serif'; ctx.fillText(g, P+20, y);
+          ctx.fillStyle='#16223d'; ctx.font='700 14px sans-serif'; ctx.fillText(String(p.name||''), P+40, y);
+          if(p.em!=null){ ctx.fillStyle='#b5852a'; ctx.font='700 13px monospace'; ctx.textAlign='right'; ctx.fillText(String(p.em), W-P, y); ctx.textAlign='left'; }
+          y+=18;
+          if(p.stocks && p.stocks.length){
+            var txt=p.stocks.map(function(s){ var c=(typeof s.chg==='number')?s.chg:0; return s.name+' '+(c>0?'+':'')+c.toFixed(1)+'%'; }).join('    ');
+            ctx.fillStyle='#8a93a3'; ctx.font='500 11px sans-serif'; ctx.fillText(txt, P+40, y); y+=18;
+          } else { y+=4; }
+        });
+        return y;
+      }
+      var list=(lastEtfGo&&lastEtfGo.length)?lastEtfGo:(lastEtfWatch||[]);
+      var label=(lastEtfGo&&lastEtfGo.length)?null:'GO 없음 · 관망(WATCH)';
+      if(!list.length){ ctx.fillStyle='#9aa3b2'; ctx.font='500 12px sans-serif'; ctx.fillText('오늘은 진입 GO 후보 없음', P+4, y); return y+16; }
+      if(label){ ctx.fillStyle='#9aa3b2'; ctx.font='500 11px sans-serif'; ctx.fillText(label, P+4, y); y+=18; }
+      list.forEach(function(p,i){
+        ctx.fillStyle='#9aa3b2'; ctx.font='700 11px monospace'; ctx.textAlign='left'; ctx.fillText(String(i+1), P+2, y);
+        ctx.fillStyle='#16223d'; ctx.font='700 14px sans-serif'; ctx.fillText(String(p.name||''), P+20, y);
+        var nw=ctx.measureText(String(p.name||'')).width;
+        if(p.phase){ ctx.fillStyle='#8a93a3'; ctx.font='500 11px sans-serif'; ctx.fillText('· '+p.phase, P+28+nw, y); }
+        if(p.score!=null){ ctx.fillStyle='#1f8a5b'; ctx.font='700 13px monospace'; ctx.textAlign='right'; ctx.fillText(String(p.score), W-P, y); ctx.textAlign='left'; }
+        y+=20;
+      });
+      return y;
+    }
+    function downloadBlob(blob,fname){ var url=URL.createObjectURL(blob); var a=document.createElement('a'); a.href=url; a.download=fname; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){URL.revokeObjectURL(url);},1500); }
+    function saveOrShare(blob){
+      var fname='콕추천_'+dayKey()+'.png';
+      try{
+        var file=new File([blob],fname,{type:'image/png'});
+        if(navigator.canShare && navigator.canShare({files:[file]})){
+          navigator.share({files:[file], title:'오늘의 콕 추천'}).catch(function(){ downloadBlob(blob,fname); });
+          return;
+        }
+      }catch(e){}
+      downloadBlob(blob,fname);
+    }
+    function exportCard(){
+      var DPR=2, W=720, TALL=1600;
+      var big=document.createElement('canvas'); big.width=W*DPR; big.height=TALL*DPR;
+      var ctx=big.getContext('2d'); ctx.scale(DPR,DPR); ctx.textBaseline='alphabetic';
+      ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,W,TALL);
+      var P=30, y=40;
+      ctx.fillStyle='#9aa3b2'; ctx.font='600 11px monospace'; ctx.textAlign='left'; ctx.fillText('JUDO SECTOR CONSOLE', P, y);
+      ctx.fillStyle='#16223d'; ctx.font='700 24px sans-serif'; y+=30; ctx.fillText('🎯 오늘의 콕 추천', P, y);
+      ctx.fillStyle='#9aa3b2'; ctx.font='500 13px sans-serif'; ctx.textAlign='right'; ctx.fillText(dayKey(), W-P, y); ctx.textAlign='left';
+      y+=14; ctx.strokeStyle='#eceff3'; ctx.beginPath(); ctx.moveTo(P,y); ctx.lineTo(W-P,y); ctx.stroke(); y+=26;
+      y=drawSection(ctx,P,W,y,'sector'); y+=12;
+      y=drawSection(ctx,P,W,y,'etf'); y+=10;
+      ctx.strokeStyle='#eceff3'; ctx.beginPath(); ctx.moveTo(P,y); ctx.lineTo(W-P,y); ctx.stroke(); y+=20;
+      ctx.fillStyle='#9aa3b2'; ctx.font='500 11px sans-serif'; ctx.fillText('신호 요약일 뿐 수익 보장이 아니며, 진입 전 손절·수량은 직접 계산하세요. (종가 기준)', P, y); y+=16;
+      var H=y+8;
+      var out=document.createElement('canvas'); out.width=W*DPR; out.height=H*DPR;
+      out.getContext('2d').drawImage(big, 0,0, W*DPR, H*DPR, 0,0, W*DPR, H*DPR);
+      if(out.toBlob) out.toBlob(function(b){ if(b) saveOrShare(b); }, 'image/png');
+      else downloadBlob(null,'');
+    }
+    var pkShare=$('#pick-share'); if(pkShare) pkShare.onclick=function(ev){ ev.stopPropagation(); exportCard(); };
 
     /* 초기화 */
     renderRoutine();

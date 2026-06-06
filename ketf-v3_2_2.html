@@ -4612,9 +4612,42 @@ loadAll();
 <script>
 /* ── 콘솔 연동 훅 (자동 주입) ── */
 (function(){
+  // 섹터 한글명 → 매칭 ETF 1~2개 (THEMES 키워드 + 이름 부분매칭, 거래대금 우선)
+  function slimEtf(d){
+    return { code:d.code, name:d.name, em:Math.round(d.emergingScore||0),
+             phase:(d.phase&&(d.phase.name||d.phase.key))||'', amountB:Math.round(d.amountB||0) };
+  }
+  function matchEtfForSector(sectorName){
+    try{
+      if (typeof DATA==='undefined' || !DATA || !DATA.length) return [];
+      var name = String(sectorName||'').trim(); if(!name) return [];
+      var key = null;
+      if (typeof THEMES!=='undefined' && THEMES){
+        for (var i=0;i<THEMES.length && !key;i++){
+          var t=THEMES[i]; if(t.hide) continue;
+          for (var j=0;j<t.kw.length;j++){
+            var k=String(t.kw[j]).trim();
+            if(k && (name.indexOf(k)>=0 || k.indexOf(name)>=0)){ key=t.key; break; }
+          }
+        }
+      }
+      var pool = DATA.filter(function(d){ return d && !d.isLeverage && !d.isFixedIncome; });
+      var res = [];
+      if (key) res = pool.filter(function(d){ return d.themes && d.themes.indexOf(key)>=0; });
+      if (!res.length && name.length>=2) res = pool.filter(function(d){ return d.name && d.name.indexOf(name)>=0; });
+      res.sort(function(a,b){ return (b.amountB||0)-(a.amountB||0); });
+      return res.slice(0,2).map(slimEtf);
+    }catch(e){ return []; }
+  }
   window.addEventListener('message', function(e){
     var d = e.data;
     if (!d) return;
+    if (d.type === 'console-match-etf' && Array.isArray(d.names)){
+      var out = {};
+      d.names.forEach(function(nm){ out[nm] = matchEtfForSector(nm); });
+      try{ parent.postMessage({ type:'console-etf-matches', matches: out }, '*'); }catch(err){}
+      return;
+    }
     if (d.type === 'ktf-do-search' && d.name){
       try{
         var stab = document.querySelector('.tab[data-panel="search"]'); if (stab) stab.click();
