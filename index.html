@@ -139,6 +139,23 @@
   .help-card ol{margin:8px 0; padding-left:20px} .help-card li{margin-bottom:7px}
   .help-card .pipe{background:var(--bar-2); border:1px solid var(--line); border-left:4px solid var(--gold-solid); border-radius:var(--r); padding:13px 16px; margin:14px 0; font-size:13px; line-height:1.65}
   .help-card .sec-c{color:var(--sector); font-weight:700} .help-card .etf-c{color:var(--em); font-weight:700}
+  .sync-card{max-width:480px}
+  .sync-field{margin:18px 0 12px}
+  .sync-field label{display:block; font-size:12px; font-weight:700; color:var(--ink-2); margin-bottom:6px}
+  .sync-field label span{font-weight:500; color:var(--ink-3); font-family:var(--mono); font-size:10.5px}
+  .sync-field input{width:100%; box-sizing:border-box; font-family:var(--mono); font-size:15px; padding:11px 13px; border:1px solid var(--line-2); border-radius:var(--r); background:#fff; color:var(--ink); letter-spacing:.02em}
+  .sync-field input:focus{outline:none; border-color:var(--em)}
+  .sync-auto{display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--ink-2); cursor:pointer; margin-bottom:16px}
+  .sync-auto input{width:15px; height:15px; cursor:pointer}
+  .sync-btns{display:flex; gap:9px}
+  .sync-btn{flex:1 1 0; font-family:var(--sans); font-size:13.5px; font-weight:700; padding:11px; border:1px solid var(--line-2); border-radius:var(--r); background:var(--bar); color:var(--ink-2); cursor:pointer; transition:.14s}
+  .sync-btn:hover{border-color:var(--ink-3); color:var(--ink)}
+  .sync-btn.primary{background:var(--em); color:#fff; border-color:var(--em)}
+  .sync-btn.primary:hover{filter:brightness(1.06); color:#fff}
+  .sync-status{min-height:18px; margin-top:13px; font-size:12.5px; font-family:var(--mono); color:var(--ink-3); line-height:1.5}
+  .sync-status.ok{color:var(--em)}
+  .sync-status.err{color:#d62828}
+  .sync-note{margin-top:14px; font-size:11px; line-height:1.6; color:var(--ink-3); background:var(--bar-2); border:1px solid var(--line); border-radius:var(--r); padding:10px 12px}
   .help-close{position:absolute; top:18px; right:20px; font-family:var(--mono); font-size:11px; padding:8px 13px; border:1px solid var(--line-2); border-radius:var(--r); background:var(--bar); color:var(--ink-2); cursor:pointer}
 
   .bridge-toast{position:fixed; left:50%; bottom:22px; transform:translateX(-50%) translateY(160%); z-index:60; display:flex; align-items:center; gap:11px; background:#1b2130; color:#f3f1ea; border-radius:30px; padding:11px 12px 11px 18px; box-shadow:0 16px 44px rgba(27,33,48,.42); font-size:13px; transition:transform .32s cubic-bezier(.2,.8,.2,1); max-width:92vw}
@@ -176,6 +193,7 @@
       <div class="ch-title"><span class="s1">주도섹터</span><span class="arr">↔</span><span class="s2">K-ETF</span><span class="ch-suffix"> 운영 콘솔</span></div>
     </div>
     <button class="ch-help" id="open-help">📖 운용법</button>
+    <button class="ch-help" id="open-sync" title="PC ↔ 모바일 기록 동기화">☁ 동기화</button>
     <button class="ch-refresh" id="refresh-all" title="두 도구를 한 번에 새로고침"><span class="ra-ic">↻</span> 전체 새로고침</button>
     <div class="ch-clock" id="clk">—</div>
   </header>
@@ -257,6 +275,26 @@
     <span class="bt-ic">🔗</span><span class="bt-text" id="bt-text"></span>
     <button class="bt-go" id="bt-go">K-ETF에서 찾기 →</button>
     <button class="bt-x" id="bt-x" title="닫기">✕</button>
+  </div>
+
+  <div class="help-ov" id="sync-ov">
+    <div class="help-card sync-card">
+      <button class="help-close" id="close-sync">닫기 ✕</button>
+      <h2>기기 간 동기화</h2>
+      <div class="hc-sub">로그인 없이 · 코드만 같으면 PC ↔ 모바일 공유</div>
+      <p>본인만 아는 <b>동기화 코드</b>를 PC와 모바일에 <b>똑같이</b> 입력하세요. 추천 이력·루틴 체크·스냅샷이 클라우드에 저장돼 어느 기기서나 이어집니다.</p>
+      <div class="sync-field">
+        <label>동기화 코드 <span>(4자 이상 · 영문·숫자·-·_)</span></label>
+        <input id="sync-code" type="text" placeholder="예: judo-kim-2026" autocomplete="off" autocapitalize="off" spellcheck="false">
+      </div>
+      <label class="sync-auto"><input type="checkbox" id="sync-auto"> 자동 동기화 — 열 때 가져오고, 나갈 때 저장</label>
+      <div class="sync-btns">
+        <button id="sync-pull" class="sync-btn">⬇ 가져오기</button>
+        <button id="sync-push" class="sync-btn primary">⬆ 저장하기</button>
+      </div>
+      <div class="sync-status" id="sync-status"></div>
+      <div class="sync-note">⚠️ 코드를 아는 사람은 데이터에 접근할 수 있어요. 길고 본인만 아는 코드를 쓰고, 민감한 개인정보는 넣지 마세요. (저장되는 건 섹터·ETF 추천 기록과 루틴 체크 정도예요.)</div>
+    </div>
   </div>
 
   <script>
@@ -495,16 +533,80 @@
     }
     var pkShare=$('#pick-share'); if(pkShare) pkShare.onclick=function(ev){ ev.stopPropagation(); exportCard(); };
 
+    /* 기기 간 동기화 (동기화 코드 → Netlify Blobs) — 콘솔·섹터·ETF가 같은 origin이라 localStorage 공유 */
+    var SYNC_FN='/.netlify/functions/sync';
+    var SYNC_CTRL={ console_sync_code:1, console_sync_auto:1, console_sync_at:1 };
+    function syncCode(){ try{ return localStorage.getItem('console_sync_code')||''; }catch(e){ return ''; } }
+    function syncAuto(){ try{ return localStorage.getItem('console_sync_auto')==='1'; }catch(e){ return false; } }
+    function activeCode(){ var el=$('#sync-code'); var v=el&&el.value?el.value.trim():''; return v || syncCode(); }
+    function gatherLocal(){ var o={}; for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i); if(SYNC_CTRL[k]) continue; o[k]=localStorage.getItem(k); } return o; }
+    function applyLocal(data){ if(!data) return 0; var n=0; Object.keys(data).forEach(function(k){ if(SYNC_CTRL[k]) return; try{ localStorage.setItem(k, data[k]); n++; }catch(e){} }); return n; }
+    function setSyncStatus(msg, ok){ var s=$('#sync-status'); if(s){ s.textContent=msg; s.className='sync-status'+(ok===true?' ok':ok===false?' err':''); } }
+    function pushSync(silent){
+      var code=activeCode();
+      if(code.length<4){ if(!silent) setSyncStatus('코드를 4자 이상 입력하세요.', false); return Promise.resolve(false); }
+      try{ localStorage.setItem('console_sync_code', code); }catch(e){}
+      var payload=JSON.stringify({ v:1, at:Date.now(), data:gatherLocal() });
+      if(!silent) setSyncStatus('저장 중…');
+      return fetch(SYNC_FN+'?code='+encodeURIComponent(code), { method:'POST', headers:{'Content-Type':'application/json'}, body:payload, keepalive:!!silent })
+        .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t||r.status); }); return r.json(); })
+        .then(function(){ try{ localStorage.setItem('console_sync_at', String(Date.now())); }catch(e){} if(!silent) setSyncStatus('저장 완료 ✓ — 다른 기기에서 같은 코드로 「가져오기」 하세요.', true); return true; })
+        .catch(function(e){ if(!silent) setSyncStatus('저장 실패: '+(e&&e.message||e), false); return false; });
+    }
+    function pullSync(silent){
+      var code=activeCode();
+      if(code.length<4){ if(!silent) setSyncStatus('코드를 4자 이상 입력하세요.', false); return Promise.resolve(0); }
+      try{ localStorage.setItem('console_sync_code', code); }catch(e){}
+      if(!silent) setSyncStatus('가져오는 중…');
+      return fetch(SYNC_FN+'?code='+encodeURIComponent(code), { method:'GET' })
+        .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t||r.status); }); return r.json(); })
+        .then(function(j){
+          var data=(j&&j.data)?j.data:null; var n=applyLocal(data);
+          try{ localStorage.setItem('console_sync_at', String(Date.now())); }catch(e){}
+          if(!silent){
+            if(n>0){ setSyncStatus('가져오기 완료 ✓ ('+n+'개 항목) — 새로고침합니다…', true); setTimeout(function(){ location.reload(); }, 900); }
+            else setSyncStatus('이 코드로 저장된 데이터가 없습니다. 먼저 다른 기기에서 「저장하기」 하세요.', false);
+          }
+          return n;
+        })
+        .catch(function(e){ if(!silent) setSyncStatus('가져오기 실패: '+(e&&e.message||e), false); return 0; });
+    }
+    function openSync(){
+      if($('#sync-code')) $('#sync-code').value=syncCode();
+      if($('#sync-auto')) $('#sync-auto').checked=syncAuto();
+      var at=null; try{ at=localStorage.getItem('console_sync_at'); }catch(e){}
+      setSyncStatus(at? ('마지막 동기화: '+new Date(Number(at)).toLocaleString('ko-KR')) : '아직 동기화한 적 없음 — 코드를 정하고 「저장하기」부터 하세요.');
+      $('#sync-ov').classList.add('show');
+    }
+    $('#open-sync').onclick=openSync;
+    $('#close-sync').onclick=function(){ $('#sync-ov').classList.remove('show'); };
+    $('#sync-ov').onclick=function(e){ if(e.target===$('#sync-ov')) $('#sync-ov').classList.remove('show'); };
+    $('#sync-pull').onclick=function(){ pullSync(false); };
+    $('#sync-push').onclick=function(){ pushSync(false); };
+    $('#sync-auto').onchange=function(){ try{ localStorage.setItem('console_sync_auto', this.checked?'1':'0'); }catch(e){} };
+    /* 자동 동기화: 페이지를 떠날 때 저장 */
+    function autoPush(){ if(syncAuto() && syncCode().length>=4) pushSync(true); }
+    window.addEventListener('pagehide', autoPush);
+    document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='hidden') autoPush(); });
+
     /* 초기화 */
     renderRoutine();
     var pickCollapsed=false; try{ pickCollapsed=localStorage.getItem('console_pick_collapsed')==='1'; }catch(e){}
     if(pickCollapsed) $('#pick-panel').classList.add('collapsed');
-    /* 콕 추천 패널을 채우려면 두 도구를 모두 한 번씩 로드(숨겨진 채 백그라운드) */
-    setTimeout(function(){ ensureLoaded('sector'); ensureLoaded('etf'); }, 1500);
     var collapsed=false; try{ collapsed=localStorage.getItem('console_routine_collapsed')==='1'; }catch(e){}
     if(collapsed||window.innerWidth<=600) $('#routine').classList.add('collapsed');
-    var startTab='sector'; try{ startTab=localStorage.getItem('console_tab')||'sector'; }catch(e){}
-    switchTab(startTab);
+    function bootFrames(){
+      /* 콕 추천 패널을 채우려면 두 도구를 모두 한 번씩 로드(숨겨진 채 백그라운드) */
+      setTimeout(function(){ ensureLoaded('sector'); ensureLoaded('etf'); }, 1500);
+      var startTab='sector'; try{ startTab=localStorage.getItem('console_tab')||'sector'; }catch(e){}
+      switchTab(startTab);
+    }
+    /* 자동 동기화 켜져 있으면 iframe 로드 전에 원격 데이터 먼저 가져와 일관성 확보(최대 4초 대기) */
+    if(syncAuto() && syncCode().length>=4){
+      Promise.race([ pullSync(true), new Promise(function(res){ setTimeout(res, 4000); }) ]).then(bootFrames, bootFrames);
+    } else {
+      bootFrames();
+    }
   })();
   </script>
 </body>

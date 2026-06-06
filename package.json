@@ -1,0 +1,9 @@
+{
+  "name": "judosector-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "주도섹터 ↔ K-ETF 운영 콘솔 (Netlify functions: proxy, sync)",
+  "dependencies": {
+    "@netlify/blobs": "^8.1.0"
+  }
+}
