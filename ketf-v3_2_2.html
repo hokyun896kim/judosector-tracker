@@ -2402,6 +2402,16 @@ function renderActionScope() {
     if (isGo && go.length < 3) go.push(d);
     else if (watch.length < 3 && d.emergingScore >= 45) watch.push(d);
   }
+  // 통합 콘솔의 "오늘의 콕 추천" 패널로 진입 후보 전달
+  try {
+    const slim = arr => arr.map(d => ({
+      code: d.code, name: d.name, cat: d.catName || '',
+      score: Math.round(d.scopeScore || 0),
+      em: Math.round(d.emergingScore || 0),
+      phase: (d.phase && (d.phase.label || d.phase.key)) || ''
+    }));
+    parent.postMessage({ type: 'console-etf-picks', go: slim(go), watch: slim(watch) }, '*');
+  } catch(e) {}
   const grid = $('#action-grid');
   if (go.length === 0 && watch.length === 0) {
     grid.innerHTML = `<div class="action-empty"><div class="ic">🔍</div>조건을 만족하는 진입 후보가 없습니다.<br/>시장이 방어 국면이거나 유동성이 부족할 수 있습니다. 무리한 진입보다 관망이 유리한 날입니다.</div>`;

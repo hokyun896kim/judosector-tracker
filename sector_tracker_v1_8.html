@@ -2212,6 +2212,8 @@ function savePicks(scored) {
   const keys = Object.keys(picks).sort();
   if (keys.length > 90) keys.slice(0, keys.length-90).forEach(k => delete picks[k]);
   localStorage.setItem(LS_PICKS, JSON.stringify(picks));
+  // 통합 콘솔의 "오늘의 콕 추천" 패널로 살 후보 전달
+  try { parent.postMessage({ type: 'console-sector-picks', picks: buy }, '*'); } catch(e) {}
 }
 function computeHitRate() {
   const picks = getPicks();

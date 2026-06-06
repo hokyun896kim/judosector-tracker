@@ -68,6 +68,35 @@
   .sg-tag.sec{background:var(--sector-soft); color:var(--sector)}
   .sg-tag.etf{background:var(--em-soft); color:var(--em)}
 
+  /* 오늘의 콕 추천 패널 */
+  .pick-panel{flex:0 0 auto; background:#fffdf8; border-bottom:1px solid var(--line); overflow:hidden; transition:max-height .25s ease}
+  .pick-head{display:flex; align-items:center; gap:10px; padding:9px 20px; cursor:pointer; user-select:none}
+  .pick-head .pk-ic{font-size:15px}
+  .pick-head .pk-title{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:var(--ink-2)}
+  .pick-head .pk-note{font-size:10.5px; color:var(--ink-3); font-weight:500}
+  .pick-head .pk-caret{margin-left:auto; font-family:var(--mono); font-size:11px; color:var(--ink-3); transition:transform .25s}
+  .pick-panel.collapsed{max-height:38px}
+  .pick-panel.collapsed .pk-caret{transform:rotate(-90deg)}
+  .pick-body{display:flex; gap:14px; padding:2px 20px 13px}
+  .pick-col{flex:1 1 0; min-width:0}
+  .pk-col-h{display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:700; color:var(--ink); margin-bottom:7px}
+  .pk-col-h .sg-tag{font-family:var(--mono); font-size:9px; font-weight:700; letter-spacing:.04em; padding:2px 6px; border-radius:4px}
+  .pk-col-h .pk-sub{font-family:var(--mono); font-size:9.5px; font-weight:600; color:var(--ink-3); letter-spacing:.04em}
+  .pk-list{display:flex; flex-direction:column; gap:5px}
+  .pk-row{display:flex; align-items:center; gap:9px; width:100%; text-align:left; background:var(--bar); border:1px solid var(--line); border-radius:var(--r); padding:7px 11px; cursor:pointer; font-family:var(--sans); transition:.13s}
+  .pk-row:hover{border-color:var(--ink-3); transform:translateX(2px)}
+  .pk-row .pk-rank{flex:0 0 auto; font-family:var(--mono); font-size:10px; font-weight:700; color:var(--ink-3); width:13px}
+  .pk-row .pk-grade{flex:0 0 auto; font-family:var(--mono); font-size:10px; font-weight:800; width:18px; height:18px; display:flex; align-items:center; justify-content:center; border-radius:4px}
+  .pk-row .pk-grade.s{background:var(--em); color:#fff}
+  .pk-row .pk-grade.a{background:var(--em-soft); color:var(--em)}
+  .pk-row .pk-grade.b{background:var(--sector-soft); color:var(--sector)}
+  .pk-row .pk-name{flex:1 1 auto; font-size:13px; font-weight:600; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .pk-row .pk-phase{flex:0 0 auto; font-family:var(--mono); font-size:9.5px; font-weight:600; color:var(--ink-3); background:var(--bar-2); border:1px solid var(--line); border-radius:10px; padding:1px 7px}
+  .pk-row .pk-score{flex:0 0 auto; font-family:var(--mono); font-size:12px; font-weight:700; color:var(--gold-bright)}
+  .pk-empty{font-size:11.5px; color:var(--ink-3); font-family:var(--mono); padding:8px 2px}
+  .pick-col[data-col="sector"] .pk-col-h{color:var(--sector)}
+  .pick-col[data-col="etf"] .pk-col-h{color:var(--em)}
+
   .tabbar{flex:0 0 auto; display:flex; background:var(--bar-2); border-bottom:1px solid var(--line); padding:0 12px}
   .tabbtn{position:relative; display:flex; align-items:center; gap:9px; padding:13px 22px; background:transparent; border:none; border-bottom:3px solid transparent; font-family:var(--sans); font-size:14px; font-weight:600; color:var(--ink-3); cursor:pointer; transition:.15s; letter-spacing:-.01em}
   .tabbtn:hover{color:var(--ink-2)}
@@ -113,6 +142,7 @@
     .ch-title .ch-suffix{display:none}
     .ch-clock{font-size:10px} .ch-help,.ch-refresh{padding:7px 9px; font-size:10px}
     .routine-head{padding:8px 14px} .routine-body{padding:2px 14px 11px} .routine.collapsed{max-height:37px}
+    .pick-head{padding:8px 14px} .pick-body{padding:2px 14px 11px; gap:10px} .pick-head .pk-note{display:none}
     .tabbar{padding:0 6px}
     .tabbtn{padding:11px 14px; font-size:12.5px; gap:6px; flex:1; justify-content:center}
     .tabbtn .tb-sub{display:none}
@@ -146,6 +176,24 @@
       <div class="step"><span class="step-check"></span><span class="step-no">03</span><span class="step-go" data-go="etf" data-target="attack"><span class="sg-tag etf">ETF</span>조준경 → ETF 후보 좁히기</span></div>
       <div class="step"><span class="step-check"></span><span class="step-no">04</span><span class="step-go" data-go="etf" data-target="planner"><span class="sg-tag etf">ETF</span>포지션 플래너 → 수량·예약</span></div>
       <div class="step"><span class="step-check"></span><span class="step-no">05</span><span class="step-go" data-go="etf" data-target="planner"><span class="sg-tag etf">ETF</span>점검 큐 → 익일 예약 처리</span></div>
+    </div>
+  </div>
+
+  <div class="pick-panel" id="pick-panel">
+    <div class="pick-head" id="pick-toggle">
+      <span class="pk-ic">🎯</span><span class="pk-title">오늘의 콕 추천</span>
+      <span class="pk-note">신호 요약 · 진입 전 손절·수량은 직접 계산</span>
+      <span class="pk-caret">▾</span>
+    </div>
+    <div class="pick-body">
+      <div class="pick-col" data-col="sector">
+        <div class="pk-col-h"><span class="sg-tag sec">섹터</span>지금 살 후보 <span class="pk-sub">S·A 등급</span></div>
+        <div class="pk-list" id="pk-sector"><div class="pk-empty">불러오는 중…</div></div>
+      </div>
+      <div class="pick-col" data-col="etf">
+        <div class="pk-col-h"><span class="sg-tag etf">ETF</span>진입 조준경 <span class="pk-sub">GO</span></div>
+        <div class="pk-list" id="pk-etf"><div class="pk-empty">불러오는 중…</div></div>
+      </div>
     </div>
   </div>
 
@@ -261,8 +309,62 @@
     $('#bt-x').onclick=hideBridge;
     window.addEventListener('message', function(e){ var d=e.data; if(!d||d.type!=='ktf-sector-pick'||!d.name)return; showBridge(String(d.name)); });
 
+    /* 오늘의 콕 추천 패널 */
+    function esc(s){ return String(s==null?'':s).replace(/[<>&]/g, function(m){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[m];}); }
+    function gradeCls(g){ var c=(g||'').trim().charAt(0); if(c==='S')return 's'; if(c==='A')return 'a'; if(c==='B')return 'b'; return 'b'; }
+    function bindRows(box, which, target){
+      Array.prototype.slice.call(box.querySelectorAll('.pk-row')).forEach(function(el){
+        el.onclick=function(){ switchTab(which); gotoInFrame(which, target); };
+      });
+    }
+    function renderSectorPicks(picks){
+      var box=$('#pk-sector'); if(!box) return;
+      if(!picks || !picks.length){ box.innerHTML='<div class="pk-empty">오늘은 조건 충족 후보 없음</div>'; return; }
+      box.innerHTML = picks.map(function(p,i){
+        var g=(p.grade||'').trim().charAt(0)||'·';
+        return '<button class="pk-row" data-go="sector">'
+          +'<span class="pk-rank">'+(i+1)+'</span>'
+          +'<span class="pk-grade '+gradeCls(p.grade)+'">'+esc(g)+'</span>'
+          +'<span class="pk-name">'+esc(p.name)+'</span>'
+          +'<span class="pk-score">'+(p.em!=null?p.em:'')+'</span>'
+          +'</button>';
+      }).join('');
+      bindRows(box,'sector','today');
+    }
+    function etfRow(p,i){
+      return '<button class="pk-row" data-go="etf">'
+        +'<span class="pk-rank">'+(i+1)+'</span>'
+        +'<span class="pk-name">'+esc(p.name)+'</span>'
+        +(p.phase?'<span class="pk-phase">'+esc(p.phase)+'</span>':'')
+        +'<span class="pk-score">'+(p.score!=null?p.score:'')+'</span>'
+        +'</button>';
+    }
+    function renderEtfPicks(go, watch){
+      var box=$('#pk-etf'); if(!box) return;
+      if(go && go.length){
+        box.innerHTML = go.map(function(p,i){ return etfRow(p,i); }).join('');
+        bindRows(box,'etf','attack'); return;
+      }
+      if(watch && watch.length){
+        box.innerHTML = '<div class="pk-empty" style="padding:4px 2px">GO 없음 · 관망(WATCH)</div>'
+          + watch.map(function(p,i){ return etfRow(p,i); }).join('');
+        bindRows(box,'etf','attack'); return;
+      }
+      box.innerHTML='<div class="pk-empty">오늘은 진입 GO 후보 없음</div>';
+    }
+    window.addEventListener('message', function(e){
+      var d=e.data; if(!d) return;
+      if(d.type==='console-sector-picks') renderSectorPicks(d.picks);
+      else if(d.type==='console-etf-picks') renderEtfPicks(d.go, d.watch);
+    });
+    $('#pick-toggle').onclick=function(){ $('#pick-panel').classList.toggle('collapsed'); try{ localStorage.setItem('console_pick_collapsed', $('#pick-panel').classList.contains('collapsed')?'1':'0'); }catch(e){} };
+
     /* 초기화 */
     renderRoutine();
+    var pickCollapsed=false; try{ pickCollapsed=localStorage.getItem('console_pick_collapsed')==='1'; }catch(e){}
+    if(pickCollapsed) $('#pick-panel').classList.add('collapsed');
+    /* 콕 추천 패널을 채우려면 두 도구를 모두 한 번씩 로드(숨겨진 채 백그라운드) */
+    setTimeout(function(){ ensureLoaded('sector'); ensureLoaded('etf'); }, 1500);
     var collapsed=false; try{ collapsed=localStorage.getItem('console_routine_collapsed')==='1'; }catch(e){}
     if(collapsed||window.innerWidth<=600) $('#routine').classList.add('collapsed');
     var startTab='sector'; try{ startTab=localStorage.getItem('console_tab')||'sector'; }catch(e){}
