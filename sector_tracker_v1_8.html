@@ -2212,8 +2212,26 @@ function savePicks(scored) {
   const keys = Object.keys(picks).sort();
   if (keys.length > 90) keys.slice(0, keys.length-90).forEach(k => delete picks[k]);
   localStorage.setItem(LS_PICKS, JSON.stringify(picks));
-  // 통합 콘솔의 "오늘의 콕 추천" 패널로 살 후보 전달
-  try { parent.postMessage({ type: 'console-sector-picks', picks: buy }, '*'); } catch(e) {}
+  // 통합 콘솔의 "오늘의 콕 추천" 패널로 살 후보 + 관련 종목 전달
+  emitConsolePicks(buy);
+}
+// 살 후보 각각에 상위 관련 종목(등락률 순 3개)을 붙여 부모 콘솔로 전송
+async function emitConsolePicks(buy) {
+  if (window.parent === window) return;          // iframe이 아니면 스킵
+  let enriched = buy;
+  try {
+    enriched = await Promise.all((buy||[]).map(async b => {
+      let stocks = [];
+      try {
+        stocks = (await fetchSectorStocks(b.id, b.type))
+          .sort((a,c) => c.changePct - a.changePct)
+          .slice(0, 3)
+          .map(s => ({ name: s.name, code: s.code, chg: Math.round((s.changePct||0)*100)/100 }));
+      } catch(e) {}
+      return Object.assign({}, b, { stocks });
+    }));
+  } catch(e) {}
+  try { parent.postMessage({ type: 'console-sector-picks', picks: enriched }, '*'); } catch(e) {}
 }
 function computeHitRate() {
   const picks = getPicks();

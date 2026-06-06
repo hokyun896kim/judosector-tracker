@@ -94,6 +94,13 @@
   .pk-row .pk-phase{flex:0 0 auto; font-family:var(--mono); font-size:9.5px; font-weight:600; color:var(--ink-3); background:var(--bar-2); border:1px solid var(--line); border-radius:10px; padding:1px 7px}
   .pk-row .pk-score{flex:0 0 auto; font-family:var(--mono); font-size:12px; font-weight:700; color:var(--gold-bright)}
   .pk-empty{font-size:11.5px; color:var(--ink-3); font-family:var(--mono); padding:8px 2px}
+  .pk-item{display:flex; flex-direction:column; gap:3px}
+  .pk-stocks{display:flex; flex-wrap:wrap; gap:5px; padding:1px 2px 2px 24px}
+  .pk-stk{display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600; color:var(--ink-2); text-decoration:none; background:var(--bar-2); border:1px solid var(--line); border-radius:10px; padding:2px 8px; transition:.12s}
+  .pk-stk:hover{border-color:var(--ink-3); color:var(--ink)}
+  .pk-stk em{font-style:normal; font-family:var(--mono); font-size:10px; font-weight:700}
+  .pk-stk.up em{color:#d62828}
+  .pk-stk.down em{color:#1769d1}
   .pick-col[data-col="sector"] .pk-col-h{color:var(--sector)}
   .pick-col[data-col="etf"] .pk-col-h{color:var(--em)}
 
@@ -317,17 +324,30 @@
         el.onclick=function(){ switchTab(which); gotoInFrame(which, target); };
       });
     }
+    function stockChips(stocks){
+      if(!stocks || !stocks.length) return '';
+      return '<div class="pk-stocks">'+stocks.map(function(s){
+        var c=(typeof s.chg==='number')?s.chg:0;
+        var sign=(c>0?'+':'')+c.toFixed(1)+'%';
+        var href=s.code?'https://finance.naver.com/item/main.naver?code='+encodeURIComponent(s.code):'#';
+        return '<a class="pk-stk '+(c>0?'up':c<0?'down':'')+'" href="'+href+'" target="_blank" rel="noopener">'
+          +esc(s.name)+' <em>'+esc(sign)+'</em></a>';
+      }).join('')+'</div>';
+    }
     function renderSectorPicks(picks){
       var box=$('#pk-sector'); if(!box) return;
       if(!picks || !picks.length){ box.innerHTML='<div class="pk-empty">오늘은 조건 충족 후보 없음</div>'; return; }
       box.innerHTML = picks.map(function(p,i){
         var g=(p.grade||'').trim().charAt(0)||'·';
-        return '<button class="pk-row" data-go="sector">'
+        return '<div class="pk-item">'
+          +'<button class="pk-row" data-go="sector">'
           +'<span class="pk-rank">'+(i+1)+'</span>'
           +'<span class="pk-grade '+gradeCls(p.grade)+'">'+esc(g)+'</span>'
           +'<span class="pk-name">'+esc(p.name)+'</span>'
           +'<span class="pk-score">'+(p.em!=null?p.em:'')+'</span>'
-          +'</button>';
+          +'</button>'
+          +stockChips(p.stocks)
+          +'</div>';
       }).join('');
       bindRows(box,'sector','today');
     }
