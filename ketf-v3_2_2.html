@@ -7,6 +7,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <title>K-ETF 헤게모니 추적 시스템 v3.2</title>
+<script>try{if(window.self!==window.top)document.documentElement.classList.add("embedded")}catch(e){document.documentElement.classList.add("embedded")}</script>
+
 <link rel="preconnect" href="https://cdn.jsdelivr.net" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -1008,6 +1010,9 @@ h1 em,h1 i{font-style:normal}
 .action-card.watch{border:none !important}
 .bb-chip,.ac-badge,.signal-chip,.pt-flag,.pos-tag,[class^="phase-"],.badge{border-radius:999px !important; letter-spacing:0}
 .btn.primary:hover{background:#1b64da !important}
+
+/* 콘솔 안에 끼워졌을 때(모바일): 큰 제목 블록 숨김 */
+@media (max-width: 768px) { html.embedded .header { display:none; } }
 </style>
 </head>
 <body>

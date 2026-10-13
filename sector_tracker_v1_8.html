@@ -7,6 +7,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>주도섹터 트래커 v1.8</title>
+<script>try{if(window.self!==window.top)document.documentElement.classList.add("embedded")}catch(e){document.documentElement.classList.add("embedded")}</script>
+
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <style>
@@ -880,6 +882,9 @@
     .sig-card { padding:18px 14px 16px; }
     .tab-tip { font-size:12.5px; }
   }
+
+  /* 콘솔 안에 끼워졌을 때(모바일): 콘솔에 제목·전체 새로고침이 있으니 트래커 제목줄은 숨김 */
+  @media (max-width: 768px) { html.embedded header { display:none; } }
 </style>
 </head>
 <body>
