@@ -4669,7 +4669,7 @@ loadAll();
     .then(function(r){ return r.ok ? r.json() : null; })
     .then(function(j){
       SECTOR_ETFS = {};
-      ((j && j.sectors) || []).forEach(function(sec){ SECTOR_ETFS[String(sec.name).trim()] = sec.etfs || []; });
+      ((j && j.sectors) || []).forEach(function(sec){ SECTOR_ETFS[String(sec.name).trim()] = (sec.etfs || []).map(function(x){ return String(x).split(':')[0]; }); });
     })
     .catch(function(){ SECTOR_ETFS = {}; });
   var OVERSEAS_RE = /미국|글로벌|차이나|중국|일본|인도|베트남|유럽|S&P|나스닥|필라델피아|선진|신흥/;

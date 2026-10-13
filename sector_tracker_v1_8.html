@@ -824,6 +824,62 @@
   .dash-label .bar { display: none; }
   .discipline, .discipline.good, .discipline.warn { border-left: none; }
   .disc-streak { border-left: none; }
+
+  /* ==================== 주도 신호 보드 (Toss) ==================== */
+  .sig-board { margin-bottom: 14px; }
+  .sig-loading { background:#fff; border-radius:24px; padding:28px; text-align:center; color:var(--text-dim); font-size:14px; }
+  .sig-card { background:#fff; border-radius:24px; padding:20px 16px 18px; }
+  .sig-top { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+  .sig-title { font-size:24px; font-weight:800; letter-spacing:-.03em; line-height:1.2; }
+  .sig-date { font-size:13px; color:var(--text-dim); margin-top:3px; }
+  .sig-mkt { font-size:12px; font-weight:800; padding:6px 11px; border-radius:999px; white-space:nowrap; }
+  .sig-mkt.on { background:rgba(240,68,82,.1); color:var(--up); }
+  .sig-mkt.off { background:rgba(49,130,246,.1); color:var(--down); }
+  .sig-mktmsg { margin-top:14px; font-size:14px; line-height:1.55; background:var(--panel2); border-radius:14px; padding:12px 14px; }
+  .sig-sec { margin-top:24px; }
+  .sig-h { display:flex; align-items:center; gap:8px; font-size:18px; font-weight:800; letter-spacing:-.02em; }
+  .sig-n { font-size:13px; font-weight:800; color:var(--text-dim); background:var(--panel3); border-radius:999px; padding:1px 9px; }
+  .sig-hsub { font-size:12.5px; color:var(--text-dim); margin:4px 0 10px; line-height:1.5; }
+  button.sig-item { display:block; width:100%; text-align:left; background:var(--panel2); border:none; border-radius:18px;
+    padding:14px 14px 13px; margin:0 0 8px; color:var(--text); font:inherit; min-height:auto; font-weight:400; }
+  button.sig-item:active { transform:scale(.985); background:var(--panel3); }
+  .sig-row1 { display:flex; align-items:center; gap:7px; }
+  .sig-name { font-size:17px; font-weight:800; letter-spacing:-.02em; }
+  .sig-chip { font-size:11px; font-weight:800; padding:3px 9px; border-radius:999px; white-space:nowrap; }
+  .sig-chip.s { background:var(--up); color:#fff; }
+  .sig-chip.hold { background:rgba(49,130,246,.12); color:var(--accent); }
+  .sig-chip.a { background:rgba(254,152,0,.15); color:#d97c00; }
+  .sig-chip.near { background:var(--panel3); color:var(--text-dim); }
+  .sig-chip.avoid { background:rgba(25,31,40,.08); color:var(--text); }
+  .sig-today { margin-left:auto; font-size:13px; font-weight:700; white-space:nowrap; }
+  .sig-row2 { display:flex; align-items:flex-end; justify-content:space-between; gap:10px; margin-top:8px; }
+  .sig-big { font-size:26px; font-weight:800; letter-spacing:-.03em; line-height:1.1; }
+  .sig-cap { font-size:12px; color:var(--text-dim); margin-top:2px; }
+  .sig-spark { flex-shrink:0; }
+  .sig-sub { font-size:13px; color:var(--text-dim); margin-top:8px; line-height:1.45; }
+  .sig-etfs { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+  .sig-etf { font-size:12px; font-weight:700; color:#0f9960; background:rgba(21,179,113,.1); border-radius:999px; padding:4px 10px; }
+  .sig-empty { font-size:14px; color:var(--text-dim); background:var(--panel2); border-radius:14px; padding:14px; }
+  .sig-foot { margin-top:20px; font-size:11.5px; color:var(--text-dim); line-height:1.6; }
+  details.legacy > summary { list-style:none; cursor:pointer; background:#fff; border-radius:18px; padding:14px 18px; min-height:52px;
+    display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:15px; font-weight:800; }
+  details.legacy > summary::-webkit-details-marker { display:none; }
+  details.legacy > summary span { font-size:12px; font-weight:600; color:var(--text-dim); text-align:right; }
+  details.legacy[open] > summary { margin-bottom:12px; }
+
+  /* ==================== 모바일 (아이폰 17: 402×874 기준) ==================== */
+  html { -webkit-text-size-adjust:100%; }
+  @media (max-width: 768px) {
+    body { overflow-x:hidden; }
+    header { position:static; }
+    nav.tabs { position:sticky; top:0; padding-top:var(--safe-top); z-index:45; }
+    nav.tabs button { min-height:46px; padding:12px 15px; font-size:15px; }
+    main { padding-bottom:calc(28px + var(--safe-bottom)) !important; }
+    select, input[type="text"], input[type="number"], textarea { font-size:16px; }
+    button { min-height:40px; }
+    .sig-card { padding:18px 14px 16px; }
+    .tab-tip { font-size:12.5px; }
+  }
 </style>
 </head>
 <body>
@@ -860,18 +916,21 @@
 <main>
 
 <section id="today">
+  <section id="signalBoard" class="sig-board"><div class="sig-loading">주도 신호 계산 중…</div></section>
+  <div id="disciplineBox"></div>
   <div class="tab-tip">
     <span class="tip-icon">💡</span>
-    <span class="tip-text">페이지를 열면 자동으로 최신 데이터를 불러옵니다. 맨 위 <b style="color:var(--good)">액션 보드</b>가 오늘 <b>살 것 / 볼 것 / 피할 것</b>을 데이터 기준으로 분류합니다. 점수·등급 해석은 헤더 <a onclick="openHelp()">ⓘ</a>.</span>
+    <span class="tip-text">맨 위 <b>주도 신호</b>는 과거 2년치로 검증한 규칙(새로 60일 TOP5에 든 섹터)만 씁니다. 카드를 누르면 구성종목이 나옵니다. 그 아래 지표는 참고용입니다.</span>
   </div>
-  <div id="disciplineBox"></div>
   <div class="action-dash" id="actionDash" style="display:none">
+  <details class="legacy">
+    <summary>참고 지표 더보기 <span>예전 방식 · 백테스트로 검증 안 됨</span></summary>
     <div id="verdictBox"></div>
     <div id="breadthBox"></div>
     <div id="scorecardBox"></div>
-    <div class="dash-label"><span class="bar" style="background:var(--accent)"></span>오늘의 액션 보드 <span style="font-weight:400;text-transform:none;color:var(--text-dim);margin-left:2px">데이터 기반 분류 · 컨빅션 등급</span></div>
+    <div class="dash-label"><span class="bar" style="background:var(--accent)"></span>예전 액션 보드 <span style="font-weight:400;text-transform:none;color:var(--text-dim);margin-left:2px">당일 등락·확산 기반</span></div>
     <div id="actionBoardBox"></div>
-    <div class="dash-label" style="margin-top:18px"><span class="bar"></span>지금 주목 · 떠오르는 후보 <span style="font-weight:400;text-transform:none;color:var(--text-dim);margin-left:2px">막 시작하는 쪽</span></div>
+    <div class="dash-label" style="margin-top:18px"><span class="bar"></span>예전 떠오름 점수 <span style="font-weight:400;text-transform:none;color:var(--text-dim);margin-left:2px">당일 기준</span></div>
     <div class="spotlight-grid" id="spotlightGrid"></div>
     <div class="dash-label" style="margin-top:18px"><span class="bar" style="background:var(--accent)"></span>섹터 지형 <span style="font-weight:400;text-transform:none;color:var(--text-dim);margin-left:2px">강도 × 가속</span></div>
     <div id="matrixBox" class="matrix-wrap"></div>
@@ -881,6 +940,7 @@
     <div id="coolingBox"></div>
     <div class="dash-label" style="margin-top:18px"><span class="bar" style="background:var(--warn)"></span>오늘 브리핑 <span style="font-weight:400;text-transform:none;color:var(--text-dim);margin-left:2px">복사해서 기록·글감</span></div>
     <div id="briefingBox"></div>
+  </details>
   </div>
   <div id="quickStats" class="panel" style="display:none"></div>
   <div id="alertStrips"></div>
@@ -2400,8 +2460,7 @@ function savePicks(scored) {
   const keys = Object.keys(picks).sort();
   if (keys.length > 90) keys.slice(0, keys.length-90).forEach(k => delete picks[k]);
   localStorage.setItem(LS_PICKS, JSON.stringify(picks));
-  // 통합 콘솔의 "오늘의 콕 추천" 패널로 살 후보 + 관련 종목 전달
-  emitConsolePicks(buy);
+  // 콘솔 콕 추천은 이제 검증된 신호 엔진(loadSignals)이 보낸다
 }
 // 살 후보 각각에 상위 관련 종목(등락률 순 3개)을 붙여 부모 콘솔로 전송
 async function emitConsolePicks(buy) {
@@ -2611,7 +2670,123 @@ function renderToday(upjong, theme, ySnap) {
 let cachedUpjong = [];
 let cachedTheme = [];
 
+// ===== 주도 신호 보드 (서버 signals 함수 · 백테스트 검증 규칙) =====
+let SIGNALS = null;
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const sgn = (v, d = 1) => (v > 0 ? '+' : '') + Number(v).toFixed(d);
+
+async function loadSignals() {
+  const box = document.getElementById('signalBoard');
+  if (!box) return;
+  try {
+    const r = await fetch('/.netlify/functions/signals', { cache: 'no-cache' });
+    const j = await r.json();
+    if (!r.ok || j.error) throw new Error(j.error || ('HTTP ' + r.status));
+    SIGNALS = j;
+    renderSignalBoard(j);
+    emitSignalPicks(j);
+  } catch (e) {
+    box.innerHTML = `<div class="sig-card"><div class="sig-empty">신호를 못 불러왔습니다 (${esc(e.message)}). 잠시 뒤 새로고침하세요.</div></div>`;
+  }
+}
+
+function sigSpark(arr) {
+  if (!arr || arr.length < 2) return '';
+  const w = 84, h = 28, min = Math.min(...arr), max = Math.max(...arr), rng = (max - min) || 1;
+  const pts = arr.map((v, i) => `${(i / (arr.length - 1) * w).toFixed(1)},${(h - 2 - (v - min) / rng * (h - 4)).toFixed(1)}`).join(' ');
+  const up = arr[arr.length - 1] >= arr[0];
+  return `<svg class="sig-spark" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" aria-label="60일 상대강도"><polyline points="${pts}" fill="none" stroke="${up ? 'var(--up)' : 'var(--down)'}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+}
+
+function sigReason(s) {
+  const parts = [`60일 순위 ${s.rk60ago}위 → ${s.rk60}위`];
+  if (s.breadth != null) parts.push(`20일선 위 ${s.breadth}%`);
+  if (s.flow != null && s.flow >= 1.3) parts.push(`거래대금 ${s.flow.toFixed(1)}배`);
+  return parts.join(' · ');
+}
+
+function sigCard(s, kind) {
+  const chip = kind === 'buy' ? `<span class="sig-chip s">S 진입</span>`
+    : kind === 'hold' ? `<span class="sig-chip hold">${s.last.grade} · ${s.last.daysAgo}일째</span>`
+    : kind === 'watchA' ? `<span class="sig-chip a">A 관찰</span>`
+    : kind === 'near' ? `<span class="sig-chip near">곧 진입각</span>`
+    : `<span class="sig-chip avoid">피할 것</span>`;
+  let main, sub;
+  if (kind === 'hold') {
+    main = `<div class="sig-big ${s.last.excessSince >= 0 ? 'up' : 'down'}">${sgn(s.last.excessSince)}%p</div><div class="sig-cap">신호 후 초과</div>`;
+    sub = `${s.last.date.slice(4,6)}/${s.last.date.slice(6)} 신호 · 보유 기준 ${Math.max(0, (SIGNALS?.method?.holdDays || 40) - s.last.daysAgo)}거래일 남음 · 현재 ${s.rk60}위`;
+  } else {
+    main = `<div class="sig-big ${s.ex20 >= 0 ? 'up' : 'down'}">${sgn(s.ex20)}%p</div><div class="sig-cap">20일 초과</div>`;
+    sub = kind === 'avoid' ? `60일 상대강도 ${s.rk60}위 (하위) · 60일 ${sgn(s.ex60)}%p` : sigReason(s);
+  }
+  const etfs = (s.etfs || []).map(x => { const [code, name] = String(x).split(':'); return `<span class="sig-etf">${esc(name || code)}</span>`; }).join('');
+  return `<button class="sig-item" onclick="showSectorDetail('${esc(s.id)}','upjong','${esc(s.name).replace(/'/g, "\\'")}')">
+    <div class="sig-row1"><span class="sig-name">${esc(s.name)}</span>${chip}<span class="sig-today ${s.r1 >= 0 ? 'up' : 'down'}">오늘 ${sgn(s.r1, 2)}%</span></div>
+    <div class="sig-row2"><div class="sig-num">${main}</div>${sigSpark(s.spark)}</div>
+    <div class="sig-sub">${sub}</div>
+    ${etfs ? `<div class="sig-etfs">${etfs}</div>` : ''}
+  </button>`;
+}
+
+function renderSignalBoard(j) {
+  const box = document.getElementById('signalBoard');
+  const secs = j.sectors || [];
+  const buyS = secs.filter(s => s.signal === 'S').sort((a, b) => a.rk60 - b.rk60);
+  const watchA = secs.filter(s => s.signal === 'A').sort((a, b) => a.rk60 - b.rk60);
+  const hold = secs.filter(s => !s.signal && s.last).sort((a, b) => (a.last.grade > b.last.grade ? 1 : -1) || a.last.daysAgo - b.last.daysAgo);
+  const near = secs.filter(s => s.approaching).sort((a, b) => a.rk60 - b.rk60);
+  const avoid = secs.filter(s => s.avoid).sort((a, b) => b.rk60 - a.rk60);
+  const d = j.asOf || '';
+  const up = j.universe?.up60;
+  const block = (title, sub, items, empty) => `
+    <div class="sig-sec">
+      <div class="sig-h"><span>${title}</span><span class="sig-n">${items.length}</span></div>
+      ${sub ? `<div class="sig-hsub">${sub}</div>` : ''}
+      ${items.length ? items.map(([s, kind]) => sigCard(s, kind)).join('') : `<div class="sig-empty">${empty}</div>`}
+    </div>`;
+  const watch = [...watchA.map(s => [s, 'watchA']), ...near.filter(n => !n.signal).map(s => [s, 'near'])];
+  box.innerHTML = `
+    <div class="sig-card">
+      <div class="sig-top">
+        <div>
+          <div class="sig-title">주도 신호</div>
+          <div class="sig-date">${d.slice(0,4)}.${d.slice(4,6)}.${d.slice(6)} 기준 · 섹터 ${secs.length}개</div>
+        </div>
+        <span class="sig-mkt ${up ? 'on' : 'off'}">${up ? '시장 상승 국면' : '시장 60일선 아래'}</span>
+      </div>
+      <div class="sig-mktmsg">${up
+        ? 'S 신호가 유효한 장입니다. 새로 주도권을 잡은 섹터를 따라갑니다.'
+        : 'S 신호는 쉬는 장입니다. 새 주도가 나와도 A(관찰)로만 표시하고, 시장이 60일선을 되찾으면 S로 올라옵니다.'}</div>
+      ${block('지금 진입 후보', '오늘 새로 주도권을 잡은 섹터 · 다음 날 진입 기준', buyS.map(s => [s, 'buy']), up ? '오늘 새로 뜬 S 신호 없음' : '시장이 약해 S 신호 보류 중')}
+      ${block('보유 구간', `최근 ${j.method?.holdDays || 40}거래일 안에 신호가 뜬 섹터 · 순위로 끊기보다 기간 보유가 유리했음`, hold.map(s => [s, 'hold']), '보유 구간 섹터 없음')}
+      ${block('관찰', '새 주도지만 확인 조건 부족(A) · 곧 TOP5 진입각', watch, '관찰 대상 없음')}
+      ${block('피할 것', '60일 상대강도 하위 3 · 보유 중이면 정리 검토', avoid.map(s => [s, 'avoid']), '없음')}
+      <div class="sig-foot">검증: ${esc(j.method?.backtest || '')} — S ${esc(j.method?.S || '')}, A ${esc(j.method?.A || '')}, 피할 것 ${esc(j.method?.avoid || '')}. 섹터 사전이 현재 대표종목 기준이라 과거 수익은 부풀려졌을 수 있습니다. 참고용.</div>
+    </div>`;
+}
+
+// 콘솔 "오늘의 콕 추천"으로: S 진입 → 보유 구간(S, 수익 중) → A 관찰 순, 최대 5개
+async function emitSignalPicks(j) {
+  if (window.parent === window) return;
+  const secs = j.sectors || [];
+  const pick = [
+    ...secs.filter(s => s.signal === 'S').map(s => ({ s, grade: 'S 진입', em: sgn(s.ex20) })),
+    ...secs.filter(s => !s.signal && s.last && s.last.grade === 'S').sort((a, b) => a.last.daysAgo - b.last.daysAgo).map(s => ({ s, grade: 'S 보유', em: sgn(s.last.excessSince) })),
+    ...secs.filter(s => s.signal === 'A').map(s => ({ s, grade: 'A 관찰', em: sgn(s.ex20) })),
+  ].slice(0, 5);
+  const out = await Promise.all(pick.map(async p => {
+    let stocks = [];
+    try {
+      stocks = (await fetchSectorStocks(p.s.id, 'upjong')).sort((a, c) => c.changePct - a.changePct).slice(0, 3)
+        .map(x => ({ name: x.name, code: x.code, chg: Math.round((x.changePct || 0) * 100) / 100 }));
+    } catch (e) {}
+    return { id: p.s.id, type: 'upjong', name: p.s.name, grade: p.grade, em: p.em, stocks };
+  }));
+  try { parent.postMessage({ type: 'console-sector-picks', picks: out }, '*'); } catch (e) {}
+}
+
 async function refreshAll() {
+  loadSignals();
   ['btnRefreshDesktop','btnRefreshMobile'].forEach(id => {
     const btn = document.getElementById(id);
     if (btn) { btn.disabled = true; btn.textContent = '⌛ 로딩...'; }

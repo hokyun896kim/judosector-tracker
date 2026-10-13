@@ -4,6 +4,10 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#ffffff" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="주도섹터" />
 <title>통합 운영 콘솔 · 주도섹터 ↔ K-ETF</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
@@ -214,12 +218,13 @@
 
   /* Toss 모바일: 헤더 2줄, 콕 추천 세로 쌓기 */
   @media(max-width:600px){
-    header.console-head{flex-wrap:wrap; row-gap:10px}
-    .ch-brand{flex:1 0 100%; min-width:0}
-    .ch-kicker{display:none}
-    .ch-title{font-size:20px}
-    .ch-clock{margin-left:auto}
-    .ch-help,.ch-refresh{padding:8px 12px; font-size:12px}
+    header.console-head{flex-wrap:nowrap; gap:8px; padding:8px 14px}
+    .ch-brand{flex:1 1 auto; min-width:0}
+    .ch-kicker,.ch-clock,.lbl{display:none}
+    .ch-title{font-size:18px}
+    .ch-help,.ch-refresh{width:40px; height:40px; padding:0; font-size:17px; justify-content:center; display:flex; align-items:center}
+    .tabbtn{min-height:46px; font-size:14px}
+    .routine-head,.pick-head{min-height:44px}
     .pick-body{flex-direction:column; gap:16px}
     .pick-col{width:100%; min-width:0}
   }
@@ -232,9 +237,9 @@
       <div class="ch-kicker">Daily Operating Console</div>
       <div class="ch-title"><span class="s1">주도섹터</span><span class="arr">↔</span><span class="s2">K-ETF</span><span class="ch-suffix"> 운영 콘솔</span></div>
     </div>
-    <button class="ch-help" id="open-help">📖 운용법</button>
-    <button class="ch-help" id="open-sync" title="PC ↔ 모바일 기록 동기화">☁ 동기화</button>
-    <button class="ch-refresh" id="refresh-all" title="두 도구를 한 번에 새로고침"><span class="ra-ic">↻</span> 전체 새로고침</button>
+    <button class="ch-help" id="open-help" aria-label="운용법">📖<span class="lbl"> 운용법</span></button>
+    <button class="ch-help" id="open-sync" title="PC ↔ 모바일 기록 동기화" aria-label="동기화">☁<span class="lbl"> 동기화</span></button>
+    <button class="ch-refresh" id="refresh-all" title="두 도구를 한 번에 새로고침" aria-label="전체 새로고침"><span class="ra-ic">↻</span><span class="lbl"> 전체 새로고침</span></button>
     <div class="ch-clock" id="clk">—</div>
   </header>
 
@@ -656,7 +661,7 @@
 
     /* 초기화 */
     renderRoutine();
-    var pickCollapsed=false; try{ pickCollapsed=localStorage.getItem('console_pick_collapsed')==='1'; }catch(e){}
+    var pickCollapsed=window.innerWidth<=600; try{ var pv=localStorage.getItem('console_pick_collapsed'); if(pv!==null) pickCollapsed=(pv==='1'); }catch(e){}
     if(pickCollapsed) $('#pick-panel').classList.add('collapsed');
     var collapsed=false; try{ collapsed=localStorage.getItem('console_routine_collapsed')==='1'; }catch(e){}
     if(collapsed||window.innerWidth<=600) $('#routine').classList.add('collapsed');
