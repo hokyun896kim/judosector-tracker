@@ -1379,6 +1379,8 @@ const LS_WATCH = 'sectortracker_watchlist_v1';
 const LS_MEMO  = 'sectortracker_memos_v1';
 const LS_PICKS = 'sectortracker_picks_v1';
 const FOMO_THRESHOLD = 15;
+const MIN_MEMBERS = 5;   // 구성 종목이 이보다 적은 섹터는 등급·생애주기에서 제외(1종목 섹터가 Breadth +1.00으로 S 받는 문제)
+const isTiny = s => ((s.up||0) + (s.down||0) + (s.flat||0)) < MIN_MEMBERS;
 const NEW_ENTRY_TOP_N = 10;
 
 function log(msg, type='info') {
@@ -1549,6 +1551,7 @@ async function fetchSectorStocks(id, type) {
 
 function todayKey() { return new Date().toISOString().slice(0,10); }
 function saveSnapshot(upjong, theme) {
+  if (!upjong.length && !theme.length) { log('수집 0건 — 스냅샷 저장 건너뜀(이력 보호)', 'err'); return; }
   const snaps = JSON.parse(localStorage.getItem(LS_SNAPS) || '{}');
   const key = todayKey();
   snaps[key] = {
@@ -1559,7 +1562,15 @@ function saveSnapshot(upjong, theme) {
   localStorage.setItem(LS_SNAPS, JSON.stringify(snaps));
   log(`저장: ${key} (업종 ${upjong.length}, 테마 ${theme.length})`, 'ok');
 }
-function getSnapshots() { return JSON.parse(localStorage.getItem(LS_SNAPS) || '{}'); }
+function getSnapshots() {
+  // 네이버 개편으로 업종·테마 0건이 저장된 날은 '어제'·누적 계산에서 제외
+  const raw = JSON.parse(localStorage.getItem(LS_SNAPS) || '{}');
+  const out = {};
+  for (const [d, v] of Object.entries(raw)) {
+    if ((v?.upjong?.length || 0) + (v?.theme?.length || 0) > 0) out[d] = v;
+  }
+  return out;
+}
 
 function getYesterdaySnap() {
   const snaps = getSnapshots();
@@ -1814,6 +1825,7 @@ function emergingReason(s) {
 
 // v1.6 컨빅션 등급: 떠오름 + 강도 + 확산 + FOMO 결합 → 매매 액션 분류
 function computeConviction(s) {
+  if (isTiny(s)) return null;
   if (s.emerging.isFomo) {
     return { grade:'추격 금지', cls:'avoid', col:'avoid', why:`5일 누적 +${s.emerging.cum.toFixed(0)}% 과열 — 신규 추격 위험` };
   }
@@ -1907,7 +1919,7 @@ function renderActionDashboard(upjong, theme, ySnap) {
   savePicks(scored);
 
   // 지금 주목: 떠오름 점수 상위 3
-  const spotlight = [...scored].sort((a,b) => b.emerging.total - a.emerging.total).slice(0, 3);
+  const spotlight = scored.filter(s => !isTiny(s)).sort((a,b) => b.emerging.total - a.emerging.total).slice(0, 3);
   const grid = document.getElementById('spotlightGrid');
   if (!spotlight.length || spotlight[0].emerging.total < 1) {
     grid.innerHTML = '<div class="dash-empty">아직 떠오르는 후보가 약합니다. 데이터가 더 쌓이면 정확해집니다.</div>';
@@ -2335,6 +2347,7 @@ const LC_STAGES = [
 function computeLifecycleStage(s) {
   const acc = s.accelVal ?? 0, st = s.strength ?? 0, cum = s.emerging?.cum ?? 0, br = s.breadth ?? 0, d = s.delta;
   const fomo = s.emerging?.isFomo;
+  if (isTiny(s)) return 5;
   if (fomo && acc < 0.5) return 3;                          // 과열
   if (acc <= -0.3 || (d !== null && d <= -5)) return 4;     // 둔화
   if (st >= 58 && acc >= -0.3 && cum > 2) return 2;         // 성숙
@@ -2378,7 +2391,7 @@ function renderMatrix(scored) {
   const tvMax = Math.max(...scored.map(s=>s.tradingValue||0), 1);
   const rOf = v => 5 + Math.sqrt((v||0)/tvMax) * (isMobile ? 15 : 19);
   const labelN = isMobile ? 5 : 8;
-  const labeled = new Set([...scored].sort((a,b)=>b.emerging.total-a.emerging.total).slice(0,labelN).map(s=>`${s.type}:${s.id}`));
+  const labeled = new Set(scored.filter(s => !isTiny(s)).sort((a,b)=>b.emerging.total-a.emerging.total).slice(0,labelN).map(s=>`${s.type}:${s.id}`));
   const x0 = sx(50), y0 = sy(0);
 
   let svg = `<svg viewBox="0 0 ${W} ${H}" class="matrix-svg" xmlns="http://www.w3.org/2000/svg">`;
