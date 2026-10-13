@@ -137,10 +137,10 @@ export default async (req) => {
     const L = T - 1;
     const out = sectors.map((sec, k) => {
       // 최근 HOLD_DAYS 안에서 가장 최근 신호
+      // 보유 구간은 S 신호만 (A는 검증상 들고 갈 근거가 약함)
       let last = null;
       for (let t = L; t >= Math.max(80, L - HOLD_DAYS + 1); t--) {
-        const g = grade(k, t);
-        if (g) { last = { grade: g, date: dates[t], daysAgo: L - t,
+        if (grade(k, t) === 'S') { last = { grade: 'S', date: dates[t], daysAgo: L - t,
           excessSince: pct((I[k][L] / I[k][t] - 1) - (IU[L] / IU[t] - 1)) }; break; }
       }
       const v60 = sma(VAL[k], L, 60);

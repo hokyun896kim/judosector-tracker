@@ -2733,7 +2733,7 @@ function renderSignalBoard(j) {
   const secs = j.sectors || [];
   const buyS = secs.filter(s => s.signal === 'S').sort((a, b) => a.rk60 - b.rk60);
   const watchA = secs.filter(s => s.signal === 'A').sort((a, b) => a.rk60 - b.rk60);
-  const hold = secs.filter(s => !s.signal && s.last).sort((a, b) => (a.last.grade > b.last.grade ? 1 : -1) || a.last.daysAgo - b.last.daysAgo);
+  const hold = secs.filter(s => s.signal !== 'S' && s.last).sort((a, b) => a.last.daysAgo - b.last.daysAgo);
   const near = secs.filter(s => s.approaching).sort((a, b) => a.rk60 - b.rk60);
   const avoid = secs.filter(s => s.avoid).sort((a, b) => b.rk60 - a.rk60);
   const d = j.asOf || '';
@@ -2758,7 +2758,7 @@ function renderSignalBoard(j) {
         ? 'S 신호가 유효한 장입니다. 새로 주도권을 잡은 섹터를 따라갑니다.'
         : 'S 신호는 쉬는 장입니다. 새 주도가 나와도 A(관찰)로만 표시하고, 시장이 60일선을 되찾으면 S로 올라옵니다.'}</div>
       ${block('지금 진입 후보', '오늘 새로 주도권을 잡은 섹터 · 다음 날 진입 기준', buyS.map(s => [s, 'buy']), up ? '오늘 새로 뜬 S 신호 없음' : '시장이 약해 S 신호 보류 중')}
-      ${block('보유 구간', `최근 ${j.method?.holdDays || 40}거래일 안에 신호가 뜬 섹터 · 순위로 끊기보다 기간 보유가 유리했음`, hold.map(s => [s, 'hold']), '보유 구간 섹터 없음')}
+      ${block('보유 구간', `최근 ${j.method?.holdDays || 40}거래일 안에 S 신호가 뜬 섹터 · 순위로 끊기보다 기간 보유가 유리했음`, hold.map(s => [s, 'hold']), '보유 구간 섹터 없음')}
       ${block('관찰', '새 주도지만 확인 조건 부족(A) · 곧 TOP5 진입각', watch, '관찰 대상 없음')}
       ${block('피할 것', '60일 상대강도 하위 3 · 보유 중이면 정리 검토', avoid.map(s => [s, 'avoid']), '없음')}
       <div class="sig-foot">검증: ${esc(j.method?.backtest || '')} — S ${esc(j.method?.S || '')}, A ${esc(j.method?.A || '')}, 피할 것 ${esc(j.method?.avoid || '')}. 섹터 사전이 현재 대표종목 기준이라 과거 수익은 부풀려졌을 수 있습니다. 참고용.</div>
