@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<meta name="theme-color" content="#efe9dc">
+<meta name="theme-color" content="#ffffff">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>주도섹터 트래커 v1.8</title>
@@ -815,6 +815,15 @@
   .verdict-mode { font-size: 26px; font-weight: 800; letter-spacing: -0.03em; }
   .bc-ring .bc-num, .sc-rate, .disc-cnt { font-weight: 800; letter-spacing: -0.02em; }
   .up { color: var(--up); } .down { color: var(--down); }
+
+  /* Toss 2차: 색 띠·막대 제거, 섹션 제목은 굵은 텍스트로 */
+  .ab-col::before, .lc-col::before { display: none; }
+  .ab-col.buy, .ab-col.watch, .ab-col.avoid { border: none; }
+  .ab-col.avoid .ab-head { color: var(--up); }
+  .dash-label { font-size: 17px; font-weight: 800; color: var(--text); text-transform: none; letter-spacing: -0.02em; padding: 0 4px; }
+  .dash-label .bar { display: none; }
+  .discipline, .discipline.good, .discipline.warn { border-left: none; }
+  .disc-streak { border-left: none; }
 </style>
 </head>
 <body>
