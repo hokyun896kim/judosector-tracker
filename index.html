@@ -3,22 +3,21 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="theme-color" content="#e8e1d2" />
+<meta name="theme-color" content="#ffffff" />
 <title>통합 운영 콘솔 · 주도섹터 ↔ K-ETF</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --shell:#e6dfcf; --bar:#fbf8f1; --bar-2:#f2ede1;
-    --line:#d8d1c1; --line-2:#c7bfac;
-    --ink:#1b2130; --ink-2:#565d70; --ink-3:#8a8f9e;
-    --sector:#2962a8; --sector-soft:rgba(41,98,168,.12);
+    --shell:#f2f4f6; --bar:#ffffff; --bar-2:#f2f4f6;
+    --line:#e5e8eb; --line-2:#d1d6db;
+    --ink:#191f28; --ink-2:#4e5968; --ink-3:#8b95a1;
+    --sector:#3182f6; --sector-soft:rgba(49,130,246,.10);
     --gold-bright:#946700; --gold-solid:#f1be2d;
-    --em:#0a7c4c; --em-soft:rgba(10,124,76,.12);
-    --up:#e23131;
-    --r:9px; --sans:"Pretendard Variable",Pretendard,-apple-system,sans-serif;
-    --serif:"Fraunces",Georgia,serif; --mono:"JetBrains Mono",monospace;
+    --em:#15b371; --em-soft:rgba(21,179,113,.10);
+    --up:#f04452;
+    --r:14px; --sans:"Pretendard Variable",Pretendard,-apple-system,sans-serif;
+    --serif:var(--sans); --mono:var(--sans);
     --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
   }
   *{box-sizing:border-box}
@@ -182,6 +181,36 @@
     .bridge-toast .bt-text{max-width:38vw}
     .bridge-toast .bt-go{padding:8px 11px; font-size:11.5px}
   }
+
+  /* ==================== Toss 스타일 레이어 (2026-10) ==================== */
+  body{letter-spacing:-.015em; font-variant-numeric:tabular-nums}
+  header.console-head{background:#fff; border-bottom:none}
+  .ch-title{font-weight:800; letter-spacing:-.03em}
+  .ch-help,.ch-refresh,.sync-btn,.help-close,.pk-share{border:none; background:var(--bar-2); border-radius:12px; letter-spacing:0; font-weight:700}
+  .ch-refresh{background:var(--sector); color:#fff}
+  .ch-refresh:hover{color:#fff; filter:brightness(.95)}
+  .routine,.pick-panel{background:#fff; border-bottom:8px solid var(--shell)}
+  .step,.pk-row{background:var(--bar-2); border:none; border-radius:14px}
+  .step.done{background:var(--em-soft)}
+  .pk-row:hover{transform:none; filter:brightness(.98)}
+  .pk-row .pk-grade{border-radius:8px}
+  .pk-row .pk-phase,.routine-head .rh-prog{border:none; background:#fff; border-radius:999px}
+  .pk-stk,.pk-etfm{border:none; border-radius:999px; background:var(--bar-2)}
+  .pk-etfm{background:var(--em-soft)}
+  .pk-stk.up em{color:var(--up)} .pk-stk.down em{color:#3182f6}
+  .pk-new,.pk-etfm-tag,.step-go .sg-tag,.pk-col-h .sg-tag{border-radius:999px; letter-spacing:0}
+  .pk-new{background:var(--up)}
+  .tabbar{background:#fff; border-bottom:none; box-shadow:inset 0 -1px 0 var(--line)}
+  .tabbtn{font-weight:600; color:var(--ink-3)}
+  .tabbtn.active{font-weight:800}
+  .tabbtn[data-tab="sector"].active{color:var(--ink); border-bottom-color:var(--ink)}
+  .tabbtn[data-tab="etf"].active{color:var(--ink); border-bottom-color:var(--ink)}
+  .frame-wrap iframe{background:#f2f4f6}
+  .help-card{background:#fff; border:none; border-radius:24px}
+  .help-card h2,.help-card h3{font-weight:800; letter-spacing:-.03em}
+  .help-card .pipe,.sync-note{border:none; border-radius:14px; background:var(--bar-2)}
+  .sync-field input{border:none; background:var(--bar-2); border-radius:12px}
+  .sync-btn.primary{background:var(--sector)}
 </style>
 </head>
 <body>
