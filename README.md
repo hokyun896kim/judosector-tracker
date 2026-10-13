@@ -37,3 +37,13 @@ Netlify에 **Git 연동** 또는 **Netlify CLI**(`netlify deploy --prod`)로 배
 
 자체 프록시 정상 동작 여부는 도구 상단의 프록시 상태 표시가
 `netlify` 로 뜨는지로 확인할 수 있다.
+
+## 2026-10 업종·테마 "데이터 없음" 수정
+
+네이버가 `finance.naver.com/sise/sise_group*.naver` 를 새 "Npay 증권"(Next.js,
+화면에서 JS로 그리는 방식)으로 전환해, 받아온 HTML에 표가 없어 업종·테마가 0개로
+파싱됐다. 섹터 트래커의 목록·상세 수집을 네이버 모바일 JSON API로 교체했다.
+
+- 목록: `m.stock.naver.com/api/stocks/{industry|theme}?page=N&pageSize=100`
+- 상세: `m.stock.naver.com/api/stocks/{industry|theme}/{no}?page=N&pageSize=100`
+- 새 API엔 섹터 단위 거래대금이 없어 해당 칸은 `-` 로 표시된다.

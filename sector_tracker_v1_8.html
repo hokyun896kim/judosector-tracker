@@ -7,7 +7,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>주도섹터 트래커 v1.8</title>
-<script type="text/javascript" nonce="XOJ0BVE+zr3qdJZKBBAaLFbFzesxhK/xP1QmLnOdycs=" src="//lc.getunicorn.org?type=base-script&amp;request-id=11249"></script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <style>
@@ -1391,7 +1390,7 @@ function log(msg, type='info') {
   if (el.children.length > 50) el.lastChild.remove();
 }
 
-async function fetchWithProxy(url) {
+async function fetchWithProxy(url, encoding = 'euc-kr') {
   let lastErr;
   for (let i = 0; i < PROXIES.length; i++) {
     const ctrl = new AbortController();
@@ -1401,7 +1400,7 @@ async function fetchWithProxy(url) {
       const r = await fetch(PROXIES[i](url), { signal: ctrl.signal });
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const buf = await r.arrayBuffer();
-      const text = new TextDecoder('euc-kr').decode(buf);
+      const text = new TextDecoder(encoding).decode(buf);
       log(`✓ ${PROXY_NAMES[i]} (${(buf.byteLength/1024).toFixed(1)}KB)`, 'ok');
       setProxyStatus(true, PROXY_NAMES[i]);
       return text;
@@ -1491,11 +1490,61 @@ function parseSectorDetail(html) {
   return stocks.filter(s => !isNaN(s.changePct));
 }
 
-async function fetchSectorList(type) {
-  return parseSectorList(await fetchWithProxy(`https://finance.naver.com/sise/sise_group.naver?type=${type}`), type);
+// 2026-10: 네이버가 finance.naver.com/sise/sise_group*.naver 를 새 "Npay 증권"(Next.js,
+// 클라이언트 렌더링)으로 전환 → HTML에 표가 없어 파싱 0건. 공식 모바일 JSON API로 교체.
+//   목록: m.stock.naver.com/api/stocks/{industry|theme}?page=N&pageSize=100 (pageSize 최대 100)
+//   상세: m.stock.naver.com/api/stocks/{industry|theme}/{no}?page=N&pageSize=100
+const NAVER_API_KIND = { upjong: 'industry', theme: 'theme' };
+const numRaw = v => { const n = parseFloat(String(v ?? '').replace(/,/g, '')); return isNaN(n) ? 0 : n; };
+
+async function fetchNaverPaged(baseUrl, listKey, maxPages = 10) {
+  const all = [];
+  for (let page = 1; page <= maxPages; page++) {
+    const sep = baseUrl.includes('?') ? '&' : '?';
+    let json;
+    try {
+      json = JSON.parse(await fetchWithProxy(`${baseUrl}${sep}page=${page}&pageSize=100`, 'utf-8'));
+    } catch (e) {
+      if (page > 1) break;          // 마지막 페이지 다음은 404 → 정상 종료
+      throw e;
+    }
+    const items = json[listKey] || [];
+    all.push(...items);
+    const total = json.totalCount || 0;
+    if (!items.length || items.length < 100 || (total && all.length >= total)) break;
+  }
+  return all;
 }
+
+async function fetchSectorList(type) {
+  const kind = NAVER_API_KIND[type] || type;
+  const groups = await fetchNaverPaged(`https://m.stock.naver.com/api/stocks/${kind}`, 'groups');
+  return groups.map(g => {
+    const up = g.riseCount || 0, down = g.fallCount || 0, flat = g.steadyCount || 0;
+    return {
+      id: String(g.no), name: g.name,
+      change: numRaw(g.changeRate), up, flat, down,
+      tradingValue: 0, // 새 API는 섹터 단위 거래대금을 주지 않음
+      breadth: (up + down) > 0 ? (up - down) / (up + down) : 0,
+      type
+    };
+  }).filter(s => s.name);
+}
+
 async function fetchSectorStocks(id, type) {
-  return parseSectorDetail(await fetchWithProxy(`https://finance.naver.com/sise/sise_group_detail.naver?no=${id}&type=${type}`));
+  const kind = NAVER_API_KIND[type] || type;
+  const stocks = await fetchNaverPaged(`https://m.stock.naver.com/api/stocks/${kind}/${id}`, 'stocks', 5);
+  return stocks.map(x => {
+    const changePct = numRaw(x.fluctuationsRatio);
+    const absDiff = Math.abs(numRaw(x.compareToPreviousClosePriceRaw ?? x.compareToPreviousClosePrice));
+    return {
+      code: x.itemCode, name: x.stockName,
+      price: numRaw(x.closePriceRaw ?? x.closePrice),
+      diff: changePct < 0 ? -absDiff : absDiff,
+      changePct,
+      volume: numRaw(x.accumulatedTradingVolumeRaw ?? x.accumulatedTradingVolume),
+    };
+  }).filter(s => s.code && !isNaN(s.changePct));
 }
 
 function todayKey() { return new Date().toISOString().slice(0,10); }
