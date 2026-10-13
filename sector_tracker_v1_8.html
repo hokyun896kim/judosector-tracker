@@ -11,25 +11,25 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <style>
   :root {
-    --bg: #efe9dc;
-    --panel: #fbf9f3;
-    --panel2: #f2eddf;
-    --panel3: #e7e0cf;
-    --border: #dcd3c1;
-    --text: #292824;
-    --text-dim: #897f6c;
-    --accent: #2962a8;
-    --up: #c8312b;
-    --down: #2563c4;
-    --flat: #897f6c;
-    --warn: #b07d12;
-    --good: #1f7a4d;
+    --bg: #f2f4f6;
+    --panel: #ffffff;
+    --panel2: #f9fafb;
+    --panel3: #f2f4f6;
+    --border: #e5e8eb;
+    --text: #191f28;
+    --text-dim: #8b95a1;
+    --accent: #3182f6;
+    --up: #f04452;
+    --down: #3182f6;
+    --flat: #8b95a1;
+    --warn: #fe9800;
+    --good: #15b371;
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
     --safe-left: env(safe-area-inset-left, 0px);
     --safe-right: env(safe-area-inset-right, 0px);
-    --radius: 8px;
-    --radius-lg: 12px;
+    --radius: 12px;
+    --radius-lg: 20px;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { overscroll-behavior-y: none; }
@@ -767,6 +767,54 @@
   .vault-drop { border-color:var(--down); color:var(--down); }
   .vault-seal-btn { width:100%; margin-bottom:12px; border-color:var(--warn); color:var(--warn); font-weight:700; }
   .vault-seal-btn:hover { background:var(--warn); color:#fff; }
+
+  /* ==================== Toss 스타일 레이어 (2026-10) ====================
+     연회색 바탕 + 테두리 없는 흰 카드 + 큰 숫자 + 둥근 칩. 상승 빨강 / 하락 파랑 */
+  body { background: var(--bg); letter-spacing: -0.015em; }
+  header, nav.tabs { background: #fff; border-bottom: none; }
+  nav.tabs { box-shadow: inset 0 -1px 0 var(--border); }
+  nav.tabs button { font-weight: 600; color: var(--text-dim); }
+  nav.tabs button.active { color: var(--text); font-weight: 800; border-bottom-color: var(--text); }
+  .panel, .ab-col, .spot-card, .matrix-wrap, .briefing, .breadth-card, .scorecard,
+  .discipline, .verdict, .modal, .help-modal {
+    background: #fff; border: none; border-radius: 20px; box-shadow: none;
+  }
+  .panel, .breadth-card, .scorecard, .verdict, .discipline, .briefing { padding: 20px; }
+  .help-modal-header { border-bottom: none; }
+  .lc-col { border: none; background: var(--panel2); border-radius: 14px; }
+  .verdict::before { opacity: .06 !important; }
+  .discipline { background: #fff; border-left: none !important; }
+  .alert-strip, .alert-strip.warn, .tab-tip {
+    background: var(--panel2); border-left: none; border-radius: 14px; padding: 12px 14px;
+  }
+  .alert-strip { background: rgba(240,68,82,.07); }
+  .alert-strip.warn { background: rgba(254,152,0,.09); }
+  .tab-tip { background: rgba(49,130,246,.07); }
+  .spot-card.attack, .spot-card.fomo { border: none; animation: none; }
+  .spot-card.attack { box-shadow: inset 0 0 0 2px rgba(21,179,113,.35); }
+  .spot-card.fomo { box-shadow: inset 0 0 0 2px rgba(254,152,0,.35); }
+  .spot-rank { color: rgba(25,31,40,.06); }
+  .em-fill { background: var(--accent); border-radius: 999px; }
+  .spot-card.fomo .em-fill { background: var(--warn); }
+
+  /* 버튼·칩: 알약 모양 */
+  button { background: var(--panel3); border: none; border-radius: 12px; font-weight: 600; }
+  button:hover { border-color: transparent; filter: brightness(.97); }
+  button.primary { background: var(--accent); color: #fff; }
+  .pill { border-radius: 999px; border: none; padding: 2px 8px; font-weight: 700; }
+  .pill.upjong { background: rgba(49,130,246,.1); color: var(--accent); }
+  .pill.theme { background: rgba(254,152,0,.12); color: #d97c00; }
+  .grade-chip { border-radius: 999px; padding: 2px 8px; font-size: 10px; }
+  .grade-chip.b { border: none; background: var(--panel3); }
+  select, input[type="text"], input[type="number"], textarea { background: var(--panel3); border: none; border-radius: 12px; }
+
+  /* 숫자: 크고 진하게 */
+  .sector-card .change-cell { font-size: 17px; font-weight: 800; }
+  .sector-card .rank-cell { font-size: 15px; color: var(--text-dim); font-weight: 700; }
+  .quick-stat-cell .value { font-size: 20px; font-weight: 800; }
+  .verdict-mode { font-size: 26px; font-weight: 800; letter-spacing: -0.03em; }
+  .bc-ring .bc-num, .sc-rate, .disc-cnt { font-weight: 800; letter-spacing: -0.02em; }
+  .up { color: var(--up); } .down { color: var(--down); }
 </style>
 </head>
 <body>
