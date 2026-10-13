@@ -4616,10 +4616,25 @@ loadAll();
     return { code:d.code, name:d.name, em:Math.round(d.emergingScore||0),
              phase:(d.phase&&(d.phase.name||d.phase.key))||'', amountB:Math.round(d.amountB||0) };
   }
+  // 섹터 사전(sectors.json)의 etfs 코드가 1순위 — 이름 글자 매칭으로 엉뚱한 ETF(미국 유틸리티 등)가 붙던 문제 방지
+  var SECTOR_ETFS = null;
+  var sectorEtfsReady = fetch('sectors.json', { cache: 'no-cache' })
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){
+      SECTOR_ETFS = {};
+      ((j && j.sectors) || []).forEach(function(sec){ SECTOR_ETFS[String(sec.name).trim()] = sec.etfs || []; });
+    })
+    .catch(function(){ SECTOR_ETFS = {}; });
+  var OVERSEAS_RE = /미국|글로벌|차이나|중국|일본|인도|베트남|유럽|S&P|나스닥|필라델피아|선진|신흥/;
   function matchEtfForSector(sectorName){
     try{
       if (typeof DATA==='undefined' || !DATA || !DATA.length) return [];
       var name = String(sectorName||'').trim(); if(!name) return [];
+      if (SECTOR_ETFS && Object.prototype.hasOwnProperty.call(SECTOR_ETFS, name)){
+        var byCode = {};
+        DATA.forEach(function(d){ if(d && d.code) byCode[d.code] = d; });
+        return SECTOR_ETFS[name].map(function(c){ return byCode[c]; }).filter(Boolean).slice(0,2).map(slimEtf);
+      }
       var key = null;
       if (typeof THEMES!=='undefined' && THEMES){
         for (var i=0;i<THEMES.length && !key;i++){
@@ -4630,7 +4645,7 @@ loadAll();
           }
         }
       }
-      var pool = DATA.filter(function(d){ return d && !d.isLeverage && !d.isFixedIncome; });
+      var pool = DATA.filter(function(d){ return d && !d.isLeverage && !d.isFixedIncome && !OVERSEAS_RE.test(d.name||''); });
       var res = [];
       if (key) res = pool.filter(function(d){ return d.themes && d.themes.indexOf(key)>=0; });
       if (!res.length && name.length>=2) res = pool.filter(function(d){ return d.name && d.name.indexOf(name)>=0; });
@@ -4642,9 +4657,12 @@ loadAll();
     var d = e.data;
     if (!d) return;
     if (d.type === 'console-match-etf' && Array.isArray(d.names)){
-      var out = {};
-      d.names.forEach(function(nm){ out[nm] = matchEtfForSector(nm); });
-      try{ parent.postMessage({ type:'console-etf-matches', matches: out }, '*'); }catch(err){}
+      var names = d.names;
+      sectorEtfsReady.then(function(){
+        var out = {};
+        names.forEach(function(nm){ out[nm] = matchEtfForSector(nm); });
+        try{ parent.postMessage({ type:'console-etf-matches', matches: out }, '*'); }catch(err){}
+      });
       return;
     }
     if (d.type === 'ktf-do-search' && d.name){
