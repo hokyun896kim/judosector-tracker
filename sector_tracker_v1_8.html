@@ -830,12 +830,12 @@
 
   <div class="grid-2">
     <div class="panel">
-      <h2>업종 (KRX) <span class="sub">주도 산업 — 펀더멘털</span></h2>
+      <h2>섹터 <span class="sub">자체 사전 · 구성종목 동일가중</span></h2>
       <div class="desktop-only table-wrap">
         <table id="upjongTable">
           <thead>
             <tr>
-              <th>#</th><th>Δ</th><th>업종</th>
+              <th>#</th><th>Δ</th><th>섹터</th>
               <th class="num">등락률</th><th class="num">Breadth</th><th class="num">거래대금</th>
             </tr>
           </thead>
@@ -888,8 +888,8 @@
       <div class="control-group">
         <label>대상</label>
         <select id="rotType">
-          <option value="all">업종+테마</option>
-          <option value="upjong">업종만</option>
+          <option value="all">섹터+테마</option>
+          <option value="upjong">섹터만</option>
           <option value="theme">테마만</option>
         </select>
       </div>
@@ -950,8 +950,8 @@
       <div class="control-group">
         <label>대상</label>
         <select id="trendType">
-          <option value="all">업종+테마</option>
-          <option value="upjong">업종만</option>
+          <option value="all">섹터+테마</option>
+          <option value="upjong">섹터만</option>
           <option value="theme">테마만</option>
         </select>
       </div>
@@ -1335,8 +1335,8 @@
         <div class="help-section-body">
           <h4>데이터 출처</h4>
           <ul>
-            <li>네이버금융 <code>finance.naver.com</code> 업종/테마 페이지</li>
-            <li>업종 = KRX 표준 분류 / 테마 = 네이버 자체 분류</li>
+            <li>섹터: 자체 사전 <code>sectors.json</code> + 네이버 실시간 시세 / 테마: 네이버 모바일 API</li>
+            <li>섹터 = 본업 기준으로 직접 고른 구성종목(동일가중) / 테마 = 네이버 자체 분류</li>
           </ul>
           <h4>저장 / 동기화</h4>
           <ul>
@@ -1380,7 +1380,7 @@ const LS_MEMO  = 'sectortracker_memos_v1';
 const LS_PICKS = 'sectortracker_picks_v1';
 const FOMO_THRESHOLD = 15;
 const MIN_MEMBERS = 5;   // 구성 종목이 이보다 적은 섹터는 등급·생애주기에서 제외(1종목 섹터가 Breadth +1.00으로 S 받는 문제)
-const isTiny = s => ((s.up||0) + (s.down||0) + (s.flat||0)) < MIN_MEMBERS;
+const isTiny = s => !s.curated && s.type !== 'upjong' && ((s.up||0) + (s.down||0) + (s.flat||0)) < MIN_MEMBERS;
 const NEW_ENTRY_TOP_N = 10;
 
 function log(msg, type='info') {
@@ -1518,7 +1518,68 @@ async function fetchNaverPaged(baseUrl, listKey, maxPages = 10) {
   return all;
 }
 
+// ===== 섹터(자체 사전) =====
+// 네이버 '업종'은 회사를 매출 기준 한 칸에만 넣어 2차전지·전선 등이 뒤섞임 → 자체 사전(sectors.json)으로 대체.
+// 섹터 등락 = 구성종목 등락률 단순평균(동일가중, 대형주 한 종목에 끌려가지 않게). 대금 = 구성종목 거래대금 합.
+// 시세: polling.finance.naver.com/api/realtime/domestic/stock/{코드,코드,...} (40개씩 끊어서)
+let SECTOR_DICT = null;
+let SECTOR_QUOTES = {};   // code → 시세 (마지막 수집분)
+
+async function loadSectorDict() {
+  if (SECTOR_DICT) return SECTOR_DICT;
+  const r = await fetch('sectors.json', { cache: 'no-cache' });
+  if (!r.ok) throw new Error('sectors.json HTTP ' + r.status);
+  const j = await r.json();
+  SECTOR_DICT = (j.sectors || []).map(sec => ({
+    id: sec.id, name: sec.name, group: sec.group || '',
+    members: (sec.stocks || []).map(x => { const i = x.indexOf(':'); return { code: x.slice(0, i), name: x.slice(i + 1) }; })
+  }));
+  return SECTOR_DICT;
+}
+
+async function fetchQuotes(codes) {
+  const uniq = [...new Set(codes)];
+  const out = {};
+  for (let i = 0; i < uniq.length; i += 40) {
+    const batch = uniq.slice(i, i + 40);
+    const json = JSON.parse(await fetchWithProxy(
+      `https://polling.finance.naver.com/api/realtime/domestic/stock/${batch.join(',')}`, 'utf-8'));
+    (json.datas || []).forEach(d => {
+      out[d.itemCode] = {
+        code: d.itemCode, name: d.stockName,
+        changePct: numRaw(d.fluctuationsRatioRaw ?? d.fluctuationsRatio),
+        price: numRaw(d.closePriceRaw ?? d.closePrice),
+        diff: numRaw(d.compareToPreviousClosePriceRaw ?? d.compareToPreviousClosePrice),
+        volume: numRaw(d.accumulatedTradingVolumeRaw ?? d.accumulatedTradingVolume),
+        value: numRaw(d.accumulatedTradingValueRaw),
+      };
+    });
+  }
+  return out;
+}
+
+async function fetchCuratedSectors() {
+  const dict = await loadSectorDict();
+  const quotes = await fetchQuotes(dict.flatMap(s => s.members.map(m => m.code)));
+  SECTOR_QUOTES = quotes;
+  const missing = dict.flatMap(s => s.members).filter(m => !quotes[m.code]);
+  if (missing.length) log(`시세 없음(상폐·코드변경 의심): ${[...new Set(missing.map(m => m.name))].join(', ')}`, 'err');
+  return dict.map(sec => {
+    const qs = sec.members.map(m => quotes[m.code]).filter(Boolean);
+    let up = 0, down = 0, flat = 0, sum = 0, tv = 0;
+    qs.forEach(q => { if (q.changePct > 0) up++; else if (q.changePct < 0) down++; else flat++; sum += q.changePct; tv += q.value; });
+    return {
+      id: sec.id, name: sec.name, group: sec.group,
+      change: qs.length ? +(sum / qs.length).toFixed(2) : 0,
+      up, flat, down, tradingValue: tv,
+      breadth: (up + down) > 0 ? (up - down) / (up + down) : 0,
+      type: 'upjong', curated: true
+    };
+  }).filter(s => (s.up + s.down + s.flat) > 0);
+}
+
 async function fetchSectorList(type) {
+  if (type === 'upjong') return fetchCuratedSectors();
   const kind = NAVER_API_KIND[type] || type;
   const groups = await fetchNaverPaged(`https://m.stock.naver.com/api/stocks/${kind}`, 'groups');
   return groups.map(g => {
@@ -1526,7 +1587,7 @@ async function fetchSectorList(type) {
     return {
       id: String(g.no), name: g.name,
       change: numRaw(g.changeRate), up, flat, down,
-      tradingValue: 0, // 새 API는 섹터 단위 거래대금을 주지 않음
+      tradingValue: 0, // 네이버 테마 API는 거래대금을 주지 않음
       breadth: (up + down) > 0 ? (up - down) / (up + down) : 0,
       type
     };
@@ -1534,6 +1595,15 @@ async function fetchSectorList(type) {
 }
 
 async function fetchSectorStocks(id, type) {
+  if (type === 'upjong') {
+    const dict = await loadSectorDict();
+    const sec = dict.find(s => s.id === id);
+    if (!sec) return [];
+    let quotes = SECTOR_QUOTES;
+    if (sec.members.some(m => !quotes[m.code])) quotes = { ...quotes, ...(await fetchQuotes(sec.members.map(m => m.code))) };
+    return sec.members.map(m => quotes[m.code]).filter(Boolean)
+      .map(q => ({ code: q.code, name: q.name, price: q.price, diff: q.diff, changePct: q.changePct, volume: q.volume }));
+  }
   const kind = NAVER_API_KIND[type] || type;
   const stocks = await fetchNaverPaged(`https://m.stock.naver.com/api/stocks/${kind}/${id}`, 'stocks', 5);
   return stocks.map(x => {
@@ -1560,7 +1630,7 @@ function saveSnapshot(upjong, theme) {
     theme: theme.map(s => ({id:s.id,name:s.name,change:s.change,up:s.up,down:s.down,flat:s.flat,breadth:s.breadth,tradingValue:s.tradingValue}))
   };
   localStorage.setItem(LS_SNAPS, JSON.stringify(snaps));
-  log(`저장: ${key} (업종 ${upjong.length}, 테마 ${theme.length})`, 'ok');
+  log(`저장: ${key} (섹터 ${upjong.length}, 테마 ${theme.length})`, 'ok');
 }
 function getSnapshots() {
   // 네이버 개편으로 업종·테마 0건이 저장된 날은 '어제'·누적 계산에서 제외
@@ -1938,7 +2008,7 @@ function renderActionDashboard(upjong, theme, ySnap) {
           <div class="spot-head">
             <span class="spot-name">${s.name}</span>
             ${cvChip}
-            <span class="pill ${s.type}">${s.type==='upjong'?'업종':'테마'}</span>
+            <span class="pill ${s.type}">${s.type==='upjong'?'섹터':'테마'}</span>
           </div>
           <div class="spot-reason">${reason}</div>
           <div class="spot-change">오늘 <b class="${cls}">${sign}${s.change.toFixed(2)}%</b> · Breadth ${s.breadth>=0?'+':''}${s.breadth.toFixed(2)}</div>
@@ -2037,7 +2107,7 @@ function renderActionBoard(scored, cooling, fomoList) {
   const item = (s, i) => `<div class="ab-item" onclick="showSectorDetail('${s.id}','${s.type}','${s.name.replace(/'/g,"\\'")}')">
       ${i!=null ? `<span class="ab-num">${i+1}</span>` : ''}
       <div class="ab-item-body">
-        <div class="ab-name">${s.name} <span class="grade-chip ${s.conv.cls}">${s.conv.grade}</span> <span class="pill ${s.type}" style="font-size:9px;padding:1px 6px">${s.type==='upjong'?'업종':'테마'}</span></div>
+        <div class="ab-name">${s.name} <span class="grade-chip ${s.conv.cls}">${s.conv.grade}</span> <span class="pill ${s.type}" style="font-size:9px;padding:1px 6px">${s.type==='upjong'?'섹터':'테마'}</span></div>
         <div class="ab-reason">${s.conv.why}</div>
       </div>
     </div>`;
@@ -2174,7 +2244,7 @@ function renderVault() {
       return `<div class="vault-item locked">
         <div class="vault-lock">🔒</div>
         <div class="vault-info">
-          <div class="vault-name">${item.name} <span class="pill ${item.type}">${item.type==='upjong'?'업종':'테마'}</span></div>
+          <div class="vault-name">${item.name} <span class="pill ${item.type}">${item.type==='upjong'?'섹터':'테마'}</span></div>
           <div class="vault-reason">"${item.reason}"</div>
           <div class="vault-since">묵히는 중 · 약 ${remain}시간 남음</div>
         </div>
@@ -2187,7 +2257,7 @@ function renderVault() {
     return `<div class="vault-item ready">
       <div class="vault-lock">🔓</div>
       <div class="vault-info">
-        <div class="vault-name">${item.name} <span class="pill ${item.type}">${item.type==='upjong'?'업종':'테마'}</span></div>
+        <div class="vault-name">${item.name} <span class="pill ${item.type}">${item.type==='upjong'?'섹터':'테마'}</span></div>
         <div class="vault-reason">${item.date} 당시: "${item.reason}"</div>
         <div class="vault-since">${sinceTxt} · 지금도 사고 싶은가요?</div>
         <div class="vault-actions">
@@ -2492,9 +2562,9 @@ async function refreshAll() {
   document.getElementById('log').innerHTML = '';
   log('새로고침 시작');
   try {
-    log('업종 시세 요청...');
+    log('섹터 시세 요청...');
     cachedUpjong = await fetchSectorList('upjong');
-    log(`업종 ${cachedUpjong.length}개 파싱`);
+    log(`섹터 ${cachedUpjong.length}개 집계`);
     log('테마 시세 요청...');
     cachedTheme = await fetchSectorList('theme');
     log(`테마 ${cachedTheme.length}개 파싱`);
@@ -2519,7 +2589,7 @@ async function refreshAll() {
 
 async function showSectorDetail(id, type, name) {
   document.getElementById('modalTitleText').innerHTML =
-    `${name} <span class="pill ${type}">${type === 'upjong' ? '업종' : '테마'}</span>`;
+    `${name} <span class="pill ${type}">${type==='upjong'?'섹터':'테마'}</span>`;
   document.getElementById('modalBody').innerHTML = '<div class="empty">로딩...</div>';
   document.getElementById('modalBg').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -2604,7 +2674,7 @@ function renderRotation() {
       : `${s.yRank}위 → ${s.todayRank}위 (${s.delta > 0 ? '▲' : '▼'}${Math.abs(s.delta)})`;
     return `
       <tr onclick="showSectorDetail('${s.id}','${s.sectorType}','${s.name.replace(/'/g,"\\'")}')">
-        <td>${s.name} <span class="pill ${s.sectorType}">${s.sectorType==='upjong'?'업종':'테마'}</span></td>
+        <td>${s.name} <span class="pill ${s.sectorType}">${s.sectorType==='upjong'?'섹터':'테마'}</span></td>
         <td class="num">${delta}</td>
         <td class="num ${cls}">${sign}${s.change.toFixed(2)}%</td>
       </tr>
@@ -2623,7 +2693,7 @@ function renderRotation() {
       : `${s.yRank} → ${s.todayRank} (${s.delta > 0 ? '▲' : '▼'}${Math.abs(s.delta)})`;
     return `
       <div class="sector-card" style="grid-template-columns:1fr auto;grid-template-rows:auto auto" onclick="showSectorDetail('${s.id}','${s.sectorType}','${s.name.replace(/'/g,"\\'")}')">
-        <div class="name-row" style="grid-column:1;grid-row:1"><span class="name">${s.name}</span><span class="pill ${s.sectorType}">${s.sectorType==='upjong'?'업종':'테마'}</span></div>
+        <div class="name-row" style="grid-column:1;grid-row:1"><span class="name">${s.name}</span><span class="pill ${s.sectorType}">${s.sectorType==='upjong'?'섹터':'테마'}</span></div>
         <div class="change-cell ${cls}" style="grid-column:2;grid-row:1">${sign}${s.change.toFixed(2)}%</div>
         <div class="meta-row" style="grid-column:1/3;grid-row:2">${delta}</div>
       </div>
@@ -2687,7 +2757,7 @@ function renderTrend() {
     const bc = s.avgBreadth>0.1?'up':s.avgBreadth<-0.1?'down':'flat';
     return `<tr onclick="showSectorDetail('${s.id}','${s.type}','${s.name.replace(/'/g,"\\'")}')">
       <td>${i+1}</td>
-      <td>${s.name} <span class="pill ${s.type}">${s.type==='upjong'?'업종':'테마'}</span></td>
+      <td>${s.name} <span class="pill ${s.type}">${s.type==='upjong'?'섹터':'테마'}</span></td>
       <td class="num ${mc}">${s.mean>0?'+':''}${s.mean.toFixed(2)}%</td>
       <td class="num">${(s.winRate*100).toFixed(0)}%</td>
       <td class="num ${ac}">${s.accel>0?'+':''}${s.accel.toFixed(2)}</td>
@@ -2701,7 +2771,7 @@ function renderTrend() {
     const ac = s.accel>0?'up':s.accel<0?'down':'flat';
     return `<div class="sector-card" style="grid-template-columns:28px 1fr auto;grid-template-rows:auto auto" onclick="showSectorDetail('${s.id}','${s.type}','${s.name.replace(/'/g,"\\'")}')">
       <div class="rank-cell" style="grid-row:1/3;font-size:15px">${i+1}</div>
-      <div class="name-row" style="grid-column:2;grid-row:1"><span class="name">${s.name}</span><span class="pill ${s.type}">${s.type==='upjong'?'업종':'테마'}</span></div>
+      <div class="name-row" style="grid-column:2;grid-row:1"><span class="name">${s.name}</span><span class="pill ${s.type}">${s.type==='upjong'?'섹터':'테마'}</span></div>
       <div class="change-cell" style="grid-column:3;grid-row:1;color:var(--accent)">${s.composite.toFixed(1)}</div>
       <div class="meta-row" style="grid-column:2/4;grid-row:2">
         <span>평균 <b class="${mc}">${s.mean>0?'+':''}${s.mean.toFixed(2)}%</b></span>
@@ -2755,7 +2825,7 @@ function extractHegemony() {
       const b = s.hg.breakdown;
       return `<div class="hg-card">
         <div class="hg-card-head">
-          <span class="hg-card-name">${s.name} <span class="pill ${s.type}">${s.type==='upjong'?'업종':'테마'}</span></span>
+          <span class="hg-card-name">${s.name} <span class="pill ${s.type}">${s.type==='upjong'?'섹터':'테마'}</span></span>
           <span style="font-size:12px;color:var(--text-dim)">오늘 <b class="${s.change>0?'up':s.change<0?'down':'flat'}">${s.change>0?'+':''}${s.change.toFixed(2)}%</b></span>
         </div>
         <div class="hg-score-gauge"><div class="hg-score-fill" style="width:${s.hg.total.toFixed(0)}%"></div><div class="hg-score-text">통합 ${s.hg.total.toFixed(0)}</div></div>

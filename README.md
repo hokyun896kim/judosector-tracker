@@ -47,3 +47,15 @@ Netlify에 **Git 연동** 또는 **Netlify CLI**(`netlify deploy --prod`)로 배
 - 목록: `m.stock.naver.com/api/stocks/{industry|theme}?page=N&pageSize=100`
 - 상세: `m.stock.naver.com/api/stocks/{industry|theme}/{no}?page=N&pageSize=100`
 - 새 API엔 섹터 단위 거래대금이 없어 해당 칸은 `-` 로 표시된다.
+
+## 2026-10 섹터 = 자체 사전(sectors.json)
+
+네이버 '업종'은 회사를 매출 기준 한 칸에만 넣어서 2차전지 셀·소재와 전기부품이
+"전기제품" 한 바구니에 섞이는 등 주도섹터 판단에 맞지 않았다. 그래서 섹터는
+`sectors.json`(30개 섹터, 225종목)으로 직접 정의한다.
+
+- 뼈대: 섹터 ETF 상위 구성종목 → 본업이 그 섹터인 종목만 남김
+- 등락 = 구성종목 등락률 단순평균(동일가중), 대금 = 구성종목 거래대금 합
+- 시세: `polling.finance.naver.com/api/realtime/domestic/stock/{코드,...}`
+- 종목 추가/삭제는 `sectors.json`만 고치면 된다. 상폐·코드변경 종목은 실행 로그에 "시세 없음"으로 뜬다.
+- 테마는 계속 네이버 테마를 쓴다.
