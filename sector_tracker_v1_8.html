@@ -1380,7 +1380,7 @@ const LS_MEMO  = 'sectortracker_memos_v1';
 const LS_PICKS = 'sectortracker_picks_v1';
 const FOMO_THRESHOLD = 15;
 const MIN_MEMBERS = 5;   // 구성 종목이 이보다 적은 섹터는 등급·생애주기에서 제외(1종목 섹터가 Breadth +1.00으로 S 받는 문제)
-const isTiny = s => !s.curated && s.type !== 'upjong' && ((s.up||0) + (s.down||0) + (s.flat||0)) < MIN_MEMBERS;
+const isTiny = s => ((s.up||0) + (s.down||0) + (s.flat||0)) < MIN_MEMBERS;  // 사전 섹터도 동일 적용
 const NEW_ENTRY_TOP_N = 10;
 
 function log(msg, type='info') {
