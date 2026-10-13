@@ -211,6 +211,18 @@
   .help-card .pipe,.sync-note{border:none; border-radius:14px; background:var(--bar-2)}
   .sync-field input{border:none; background:var(--bar-2); border-radius:12px}
   .sync-btn.primary{background:var(--sector)}
+
+  /* Toss 모바일: 헤더 2줄, 콕 추천 세로 쌓기 */
+  @media(max-width:600px){
+    header.console-head{flex-wrap:wrap; row-gap:10px}
+    .ch-brand{flex:1 0 100%; min-width:0}
+    .ch-kicker{display:none}
+    .ch-title{font-size:20px}
+    .ch-clock{margin-left:auto}
+    .ch-help,.ch-refresh{padding:8px 12px; font-size:12px}
+    .pick-body{flex-direction:column; gap:16px}
+    .pick-col{width:100%; min-width:0}
+  }
 </style>
 </head>
 <body>
