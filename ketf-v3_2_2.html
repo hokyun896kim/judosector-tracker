@@ -3,39 +3,37 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<meta name="theme-color" content="#f3f1ea" />
+<meta name="theme-color" content="#f2f4f6" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <title>K-ETF 헤게모니 추적 시스템 v3.2</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&display=swap" rel="stylesheet" />
 <style>
 :root{
-  --bg:#f3f1ea;          /* 따뜻한 크림 페이지 배경 */
+  --bg:#f2f4f6;          /* 따뜻한 크림 페이지 배경 */
   --bg-2:#ffffff;        /* 카드 흰색 */
-  --bg-3:#e9edf4;        /* hover·강조 연블루그레이 */
-  --bg-4:#dbe1ec;        /* 진한 강조 */
-  --line:#e6e3d9;        /* 경계 (크림톤) */
-  --line-strong:#c9cfdb; /* 진한 경계 */
-  --ink:#161b29;         /* 본문 잉크 (거의 검정) */
-  --ink-2:#4f5870;       /* 보조 텍스트 */
-  --ink-3:#878ea0;       /* 희미한 텍스트 */
-  --gold:#bb8508;        /* 골드 텍스트·아이콘 (흰배경 가독) */
-  --gold-bright:#956800; /* 강조 골드 — 라이트에선 더 진하게 */
-  --gold-solid:#f1be2d;  /* 골드 버튼·배지 배경 (밝은 골드) */
-  --emerald:#0a955b;     /* 에메랄드 텍스트 */
-  --emerald-d:#0a7c4c;   /* 진한 에메랄드 (막대·배지배경) */
-  --up:#e23131;          /* 상승 빨강 (한국식) */
-  --down:#1a72c4;        /* 하락 파랑 (한국식) */
+  --bg-3:#f2f4f6;        /* hover·강조 연블루그레이 */
+  --bg-4:#e5e8eb;        /* 진한 강조 */
+  --line:#e5e8eb;        /* 경계 (크림톤) */
+  --line-strong:#d1d6db; /* 진한 경계 */
+  --ink:#191f28;         /* 본문 잉크 (거의 검정) */
+  --ink-2:#4e5968;       /* 보조 텍스트 */
+  --ink-3:#8b95a1;       /* 희미한 텍스트 */
+  --gold:#3182f6;        /* 골드 텍스트·아이콘 (흰배경 가독) */
+  --gold-bright:#1b64da; /* 강조 골드 — 라이트에선 더 진하게 */
+  --gold-solid:#3182f6;  /* 골드 버튼·배지 배경 (밝은 골드) */
+  --emerald:#15b371;     /* 에메랄드 텍스트 */
+  --emerald-d:#0f9960;   /* 진한 에메랄드 (막대·배지배경) */
+  --up:#f04452;          /* 상승 빨강 (한국식) */
+  --down:#3182f6;        /* 하락 파랑 (한국식) */
   --neutral:#7a8294;
-  --accent:#2f3850;
-  --serif:'Fraunces',ui-serif,Georgia,serif;
+  --accent:#191f28;
+  --serif:var(--sans);
   --sans:'Pretendard',-apple-system,system-ui,sans-serif;
-  --mono:'JetBrains Mono',ui-monospace,monospace;
-  --r:6px;
+  --mono:var(--sans);
+  --r:16px;
   --shadow-sm:0 1px 3px rgba(22,27,41,.06),0 1px 2px rgba(22,27,41,.04);
   --shadow-md:0 4px 14px rgba(22,27,41,.08),0 2px 5px rgba(22,27,41,.05);
   --shadow-lg:0 12px 36px rgba(22,27,41,.14),0 4px 12px rgba(22,27,41,.08);
@@ -78,8 +76,8 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 .timebox b{display:block;font-size:14px;color:var(--ink);font-weight:600;margin-top:3px}
 .btn{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:11px 20px;border:1px solid var(--line-strong);border-radius:var(--r);transition:.15s;color:var(--ink);font-weight:500}
 .btn:hover{border-color:var(--gold);color:var(--gold-bright);background:rgba(241,190,45,.16)}
-.btn.primary{background:var(--gold-solid);color:#3a2a02;border-color:var(--gold-solid);font-weight:700}
-.btn.primary:hover{background:#f7c948;border-color:#f7c948;color:#3a2a02}
+.btn.primary{background:var(--gold-solid);color:#fff;border-color:var(--gold-solid);font-weight:700}
+.btn.primary:hover{background:#f7c948;border-color:#f7c948;color:#fff}
 .btn:disabled{opacity:.4;cursor:not-allowed}
 
 .status{display:none;align-items:center;gap:10px;padding:10px 14px;background:var(--bg-2);border:1px solid var(--line);border-radius:var(--r);font-family:var(--mono);font-size:11px;color:var(--ink-2);margin-bottom:20px}
@@ -119,7 +117,7 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
    ════════════════════════════════════════════════ */
 .attack-wrap{display:flex;flex-direction:column;gap:20px}
 .attack-flow-label{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--ink-3);text-transform:uppercase}
-.attack-flow-label .n{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--gold-solid);color:#3a2a02;font-size:11px;font-weight:700;font-family:var(--mono)}
+.attack-flow-label .n{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--gold-solid);color:#fff;font-size:11px;font-weight:700;font-family:var(--mono)}
 
 .data-source-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:11px 16px;background:var(--bg-2);border:1px solid var(--line);border-radius:var(--r);font-family:var(--mono);font-size:11px;color:var(--ink-3)}
 .data-source-bar .ds-chip{display:inline-flex;align-items:center;gap:6px;color:var(--ink-2);font-weight:500}
@@ -166,7 +164,7 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 .az-num{display:flex;align-items:center;gap:11px;margin-bottom:14px}
 .az-num .badge{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;font-family:var(--mono);font-size:13px;font-weight:700;flex:0 0 26px}
 .az-num .badge.dim{background:var(--bg-3);color:var(--ink-2);border:1px solid var(--line-strong)}
-.az-num .badge.main{background:var(--gold-solid);color:#3a2a02}
+.az-num .badge.main{background:var(--gold-solid);color:#fff}
 .az-num h2{font-family:var(--serif);font-size:23px;font-weight:700;letter-spacing:-.02em;line-height:1}
 .az-num .meta{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:.04em}
 
@@ -404,7 +402,7 @@ tr:hover td{background:var(--bg-3)}
 .surge-pill{display:inline-block;font-family:var(--mono);font-size:11px;padding:3px 7px;border-radius:3px;background:rgba(241,190,45,.18);color:var(--gold-bright);letter-spacing:.04em;font-weight:700;border:1px solid var(--gold)}
 .cinderella-card{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--r);padding:16px;cursor:pointer;transition:.18s;position:relative;overflow:hidden}
 .cinderella-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 8px 22px rgba(187,133,8,.18)}
-.cinderella-card .nc-badge{position:absolute;top:9px;right:9px;font-family:var(--mono);font-size:9px;color:#3a2a02;background:var(--gold-solid);padding:3px 7px;border-radius:4px;letter-spacing:.06em;font-weight:700}
+.cinderella-card .nc-badge{position:absolute;top:9px;right:9px;font-family:var(--mono);font-size:9px;color:#fff;background:var(--gold-solid);padding:3px 7px;border-radius:4px;letter-spacing:.06em;font-weight:700}
 .cinderella-card .cc-rank{font-family:var(--serif);font-style:italic;font-size:15px;color:var(--gold);font-weight:700}
 .cinderella-card .cc-name{font-size:14px;font-weight:600;margin:7px 0 5px;letter-spacing:-.01em;line-height:1.35;min-height:38px}
 .cinderella-card .cc-code{font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:.05em}
@@ -961,6 +959,55 @@ tr:hover td{background:var(--bg-3)}
   .sizer-grid{grid-template-columns:1fr}
   .pos-metrics{grid-template-columns:repeat(2,1fr);gap:10px}
 }
+
+/* ==================== Toss 스타일 레이어 (2026-10) ====================
+   연회색 바탕 · 테두리 없는 흰 카드 · 큰 숫자 · 둥근 칩 · 파랑 포인트. 골드 → 토스 블루, 세리프/모노 → Pretendard */
+body{background:var(--bg) !important; letter-spacing:-.015em; font-variant-numeric:tabular-nums}
+h1,h2,h3,.kpi .v,.kpi-v{letter-spacing:-.03em}
+h1 em,h1 i{font-style:normal}
+.kpi,.action-card,.action-empty,.aw-card,.cinderella-card,.cq-item,.data-source-bar,.hc-empty,.hc-row,.hp-card,
+.nc-stat,.nc-empty,.planner-account,.planner-block,.pos-realized,.rot-wrap,.swing-card,.tablewrap,.theme-list,.watch-empty,
+.battle-brief,.market-temp,.hotpick-band,.swing-band,.newcomer-band,.planner-intro,.pa-1r,.so-cell,.pos-card,.swing-row,
+.check-queue,.modal-card,.memo-area,.compare-tray{
+  background:#fff !important; border:none !important; border-radius:20px !important; box-shadow:none !important;
+}
+.tablewrap tr{background:#fff; border:none; border-radius:20px}
+.kpi::before,.battle-brief::before,.market-temp::after,.action-card.go::before,.hotpick-band::before,.swing-card::before,
+.newcomer-band::before,.nc-stat::before,.aw-card::before,.so-cell.hero::before{display:none !important}
+.section-h h2::before,.flow-section h3::before{display:none}
+.section-h h2,.flow-section h3{font-weight:800}
+.action-card:hover,.swing-card:hover{transform:none; box-shadow:none}
+.market-temp.attack{background:rgba(240,68,82,.06) !important}
+.market-temp.defense{background:rgba(49,130,246,.06) !important}
+.so-cell.hero,.check-queue.calm{background:rgba(21,179,113,.07) !important}
+.check-queue.attention{background:rgba(254,152,0,.08) !important}
+.check-queue.urgent{background:rgba(240,68,82,.07) !important}
+.pos-card.hit-target{background:rgba(21,179,113,.07) !important}
+.pos-card.hit-stop{background:rgba(240,68,82,.07) !important}
+.guide-section .callout{border-left:none; border-radius:14px; background:var(--bg-3)}
+.score-bar i{background:var(--gold-solid)} .score-bar.em i{background:var(--emerald)}
+/* 버튼·탭·칩 */
+.btn{letter-spacing:0; text-transform:none; font-weight:700; border:none !important; border-radius:12px; background:var(--bg-3); font-size:13px}
+.btn:hover{background:var(--bg-4); color:var(--ink)}
+.btn.primary{background:var(--gold-solid); color:#fff}
+.btn.primary:hover{background:#1b64da; color:#fff}
+.btn-guide{background:var(--bg-3); color:var(--ink)}
+.tabs{border-bottom:none; box-shadow:inset 0 -1px 0 var(--line)}
+.tab{letter-spacing:0; text-transform:none; font-weight:600; color:var(--ink-3); font-size:13px}
+.tab.active,.tab.special.active,.tab.attack.active{color:var(--ink); border-bottom-color:var(--ink); font-weight:800}
+.tab.active .num,.tab.special.active .num{color:var(--ink-3)}
+.tab .nb,.tab .hot{border-radius:999px; letter-spacing:0}
+.sw-chip,.em-filters label,.mobile-sort label,.pos-mini-btn{border:none !important; border-radius:999px !important; background:var(--bg-3) !important}
+.search-bar input,.sz-etf-results,.pos-form,.status{border:none !important; border-radius:14px !important; background:#fff}
+.search-bar input{background:var(--bg-3) !important}
+.tablewrap td{font-family:var(--sans)}
+.tablewrap td.cell-rank{color:var(--ink-3) !important}
+/* 주의·관망 계열은 주황(토스 경고색), 칩은 알약형 */
+.bb-chip.market-neutral,.ac-badge.watch,.signal-chip.warn,.phase-distribute,.pt-flag.near,.pos-name .pos-tag.man-price{
+  color:#d97c00 !important; background:rgba(254,152,0,.12) !important; border-color:transparent !important}
+.action-card.watch{border:none !important}
+.bb-chip,.ac-badge,.signal-chip,.pt-flag,.pos-tag,[class^="phase-"],.badge{border-radius:999px !important; letter-spacing:0}
+.btn.primary:hover{background:#1b64da !important}
 </style>
 </head>
 <body>
