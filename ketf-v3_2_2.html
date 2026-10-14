@@ -4916,7 +4916,7 @@ loadAll();
         <div class="mchart-stats">
           <div>120일 고점까지<b class="${gap>=0?'up':''}">${gap==null?'—':(gap>=0?'돌파 중':sg(gap)+'%')}</b></div>
           <div>60일선 대비<b class="${v60>=0?'up':'down'}">${v60==null?'—':sg(v60)+'%'}</b></div>
-          <div>마지막 신고가<b>${daysSince==null?'1년 내 없음':daysSince===0?'오늘':daysSince+'일 전'}</b></div>
+          <div>마지막 120일 신고가<b>${daysSince==null?`최근 ${Math.max(0,L-120)}일 없음`:daysSince===0?'오늘':daysSince+'거래일 전'}</b></div>
         </div></div>`;
     }catch(e){ mount.innerHTML=`<div class="mchart"><div class="mchart-h"><b>차트</b><span>못 불러옴 (${E(e.message)})</span></div></div>`; }
   };
