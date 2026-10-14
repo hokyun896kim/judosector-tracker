@@ -1013,6 +1013,58 @@ h1 em,h1 i{font-style:normal}
 
 /* 콘솔 안에 끼워졌을 때(모바일): 큰 제목 블록 숨김 */
 @media (max-width: 768px) { html.embedded .header { display:none; } }
+
+.spr .up,.mchart .up{color:var(--up)} .spr .down,.mchart .down{color:var(--down)}
+/* ==================== 싹 레이더 (Toss) ==================== */
+.spr{margin-bottom:16px}
+.spr-card{background:#fff;border-radius:24px;padding:20px 16px 18px}
+.spr-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.spr-title{font-size:24px;font-weight:800;letter-spacing:-.03em;line-height:1.2}
+.spr-date{font-size:13px;color:var(--ink-3);margin-top:3px}
+.spr-mkt{font-size:12px;font-weight:800;padding:6px 11px;border-radius:999px;white-space:nowrap}
+.spr-mkt.on{background:rgba(240,68,82,.1);color:var(--up)} .spr-mkt.off{background:rgba(49,130,246,.1);color:var(--down)}
+.spr-msg{margin-top:14px;font-size:14px;line-height:1.55;background:var(--bg-3);border-radius:14px;padding:12px 14px}
+.spr-how{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.spr-how div{background:var(--bg-3);border-radius:14px;padding:10px 10px 9px;font-size:12px;color:var(--ink-2);line-height:1.4}
+.spr-how b{display:block;font-size:15px;color:var(--ink);margin-bottom:2px;letter-spacing:-.02em}
+.spr-sec{margin-top:24px}
+.spr-h{display:flex;align-items:center;gap:8px;font-size:18px;font-weight:800;letter-spacing:-.02em}
+.spr-n{font-size:13px;font-weight:800;color:var(--ink-3);background:var(--bg-3);border-radius:999px;padding:1px 9px}
+.spr-hsub{font-size:12.5px;color:var(--ink-3);margin:4px 0 10px;line-height:1.5}
+.spr-item{display:block;width:100%;text-align:left;background:var(--bg-3);border:none;border-radius:18px;padding:14px 14px 13px;margin:0 0 8px;color:var(--ink);font:inherit;cursor:pointer}
+.spr-item:active{transform:scale(.985)}
+.spr-r1{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.spr-name{font-size:16px;font-weight:800;letter-spacing:-.02em;min-width:0}
+.spr-chip{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.spr-chip.S{background:var(--up);color:#fff} .spr-chip.A{background:rgba(240,68,82,.12);color:var(--up)}
+.spr-chip.B{background:rgba(254,152,0,.15);color:#d97c00} .spr-chip.hold{background:rgba(49,130,246,.12);color:var(--down)}
+.spr-chip.wait{background:#fff;color:var(--ink-2)} .spr-chip.stop{background:var(--ink);color:#fff}
+.spr-today{margin-left:auto;font-size:13px;font-weight:700;white-space:nowrap}
+.spr-r2{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-top:8px}
+.spr-big{font-size:26px;font-weight:800;letter-spacing:-.03em;line-height:1.1}
+.spr-cap{font-size:12px;color:var(--ink-3);margin-top:2px}
+.spr-chart{flex-shrink:0;width:132px;height:52px}
+.spr-sub{font-size:13px;color:var(--ink-2);margin-top:9px;line-height:1.5}
+.spr-plan{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.spr-plan span{font-size:12px;font-weight:700;background:#fff;border-radius:999px;padding:4px 10px;color:var(--ink-2)}
+.spr-empty{font-size:14px;color:var(--ink-3);background:var(--bg-3);border-radius:14px;padding:14px;line-height:1.5}
+.spr-recent{display:flex;flex-wrap:wrap;gap:6px}
+.spr-recent span{font-size:12px;font-weight:700;background:var(--bg-3);border-radius:999px;padding:4px 10px}
+.spr-foot{margin-top:20px;font-size:11.5px;color:var(--ink-3);line-height:1.6}
+details.legacy>summary{list-style:none;cursor:pointer;background:#fff;border-radius:18px;padding:14px 18px;min-height:52px;display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:15px;font-weight:800}
+details.legacy>summary::-webkit-details-marker{display:none}
+details.legacy>summary span{font-size:12px;font-weight:600;color:var(--ink-3);text-align:right}
+details.legacy[open]>summary{margin-bottom:12px}
+.mchart{background:#fff;border-radius:18px;padding:14px 14px 10px;margin-bottom:14px}
+.mchart-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13px;color:var(--ink-3)}
+.mchart-h b{font-size:15px;color:var(--ink)}
+.mchart svg{width:100%;height:170px;display:block;margin-top:6px}
+.mchart-legend{display:flex;flex-wrap:wrap;gap:12px;font-size:11.5px;color:var(--ink-3);margin-top:4px}
+.mchart-legend i{display:inline-block;width:14px;height:0;border-top:2px solid;vertical-align:middle;margin-right:4px}
+.mchart-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.mchart-stats div{background:var(--bg-3);border-radius:12px;padding:8px 10px;font-size:11.5px;color:var(--ink-3)}
+.mchart-stats b{display:block;font-size:15px;color:var(--ink)}
+@media (max-width:600px){ #modal-body > div:nth-child(2){grid-template-columns:repeat(2,1fr) !important} .spr-how{grid-template-columns:1fr 1fr 1fr} }
 </style>
 </head>
 <body>
@@ -1137,6 +1189,11 @@ h1 em,h1 i{font-style:normal}
   <!-- ── 1: EMERGING HEGEMONY (NEW) ── -->
   <section class="panel" data-panel="emerging">
 
+    <div id="sprout-radar" class="spr"><div class="spr-card"><div class="spr-empty">싹 레이더 계산 중… (ETF 280여 개 일봉 분석, 처음엔 5초쯤)</div></div></div>
+
+    <details class="legacy">
+    <summary>예전 싹 스코어 · 스윙 픽 · 핫픽 <span>당일 스냅샷 기반 · 과거 검증에서 효과 없음</span></summary>
+
     <!-- Swing Picks (2주~2개월) -->
     <div class="swing-band" id="swing-band">
       <div class="sb-head">
@@ -1225,6 +1282,7 @@ h1 em,h1 i{font-style:normal}
       <b style="color:var(--emerald)">가속 ↗</b> 컬럼은 어제 대비 싹스코어·거래대금이 빨라지는지 보여줍니다 (ΔSpread의 ETF판, 2일째부터 활성).
       <b style="color:var(--up)">⚠️ 분배/💀 하락/🔥 과열</b> 단계는 주도주의 <b style="color:var(--ink)">생로병사</b>를 자동 추적합니다.
     </div>
+    </details>
   </section>
 
   <!-- ── 2: NEWCOMER (신규 부상) ── -->
@@ -2120,7 +2178,7 @@ function computeEmergingScores(allData) {
   const median = turnovers[Math.floor(turnovers.length/2)] || 1;
   for (const d of allData) {
     const turnoverScore = Math.min(100, (d.turnover / Math.max(median * 3, 0.5)) * 50);
-    const momentumScore = Math.min(100, Math.abs(d.earn3m) * 3.3);
+    const momentumScore = Math.min(100, Math.max(0, d.earn3m) * 3.3);  // 하락 모멘텀이 점수를 받던 절댓값 버그 수정
     const todayScore = Math.min(100, Math.max(0, d.changeRate * 14 + 30));
     const sizeScore = d.marCap < 500 ? 100
                     : d.marCap < 2000 ? 85
@@ -4331,6 +4389,7 @@ function openDetailModal(code) {
   $('#modal-title').textContent = d.name;
   $('#modal-sub').textContent = `${d.code} · ${d.catName} · ${themes || '미분류'}`;
   $('#modal-body').innerHTML = `
+    <div id="modal-chart"></div>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px">
       <div class="kpi" style="padding:14px"><div class="lab">현재가</div><div class="val" style="font-size:22px">${fmt(d.price)}</div><div class="delta">${cellChange(d.changeRate)}</div></div>
       <div class="kpi" style="padding:14px"><div class="lab">3M 수익률</div><div class="val" style="font-size:22px;color:${d.earn3m>0?'var(--up)':d.earn3m<0?'var(--down)':'var(--ink)'}">${d.earn3m>0?'+':''}${fmt(d.earn3m,{d:1})}%</div></div>
@@ -4360,6 +4419,7 @@ function openDetailModal(code) {
       </div>
     </div>
   `;
+  if (window.renderEtfChart) window.renderEtfChart(code, document.getElementById('modal-chart'));
   $('#modal-save-memo').onclick = () => {
     setMemo(code, $('#modal-memo').value);
     const b = $('#modal-save-memo'); const o = b.textContent;
@@ -4736,5 +4796,131 @@ loadAll();
 })();
 </script>
 
+
+<script>
+/* ===== 헤게모니 싹 레이더 (서버 sprouts · 차트 기반 · 과거 검증) ===== */
+(function(){
+  const E = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const sg = (v, d=1) => (v > 0 ? '+' : '') + Number(v).toFixed(d);
+  const won = v => Math.round(v).toLocaleString('ko-KR');
+  let R = null;
+
+  function mini(ch){
+    if(!ch || !ch.c || ch.c.length < 2) return '';
+    const W=132,H=52,c=ch.c, vals=c.concat(ch.ma60.filter(x=>x!=null)).concat(ch.hi?[ch.hi]:[]);
+    const mn=Math.min(...vals), mx=Math.max(...vals), rg=(mx-mn)||1;
+    const X=i=>(i/(c.length-1)*W).toFixed(1), Y=v=>(H-3-(v-mn)/rg*(H-6)).toFixed(1);
+    const line=c.map((v,i)=>`${X(i)},${Y(v)}`).join(' ');
+    const ma=ch.ma60.map((v,i)=>v==null?null:`${X(i)},${Y(v)}`).filter(Boolean).join(' ');
+    const up=c[c.length-1]>=c[0];
+    return `<svg class="spr-chart" viewBox="0 0 ${W} ${H}" aria-label="최근 120일 가격">
+      ${ch.hi?`<line x1="0" x2="${W}" y1="${Y(ch.hi)}" y2="${Y(ch.hi)}" stroke="var(--up)" stroke-width="1" stroke-dasharray="3 3" opacity=".7"/>`:''}
+      ${ma?`<polyline points="${ma}" fill="none" stroke="var(--ink-3)" stroke-width="1.2" opacity=".6"/>`:''}
+      <polyline points="${line}" fill="none" stroke="${up?'var(--up)':'var(--down)'}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+  }
+
+  function card(x, kind){
+    let chip, big, cap, sub, plan='';
+    if(kind==='today'){
+      chip = `<span class="spr-chip ${x.grade}">${x.grade==='S'?`S · ${x.together}개 동시 돌파`:x.grade==='A'?'A · 2개 동시':'B · 단독'}</span>`;
+      big = `<div class="spr-big up">120일 신고가</div>`; cap = `3개월 상대강도 상위 ${x.rsTop}%`;
+      sub = `20거래일 쉬었다가 다시 뚫음 · 3개월 ${sg(x.r63)}% · 거래대금 ${E(x.amt)}억`;
+      plan = `<span>진입: 내일 종가 근처</span><span>손절 -10% ≈ ${won(x.price*0.9)}원</span><span>보유 ${R.rules.hold}거래일</span>`;
+    } else if(kind==='hold'){
+      chip = x.stopHit ? `<span class="spr-chip stop">손절선 이탈</span>` : `<span class="spr-chip hold">${x.grade} · ${x.daysAgo}일째</span>`;
+      big = `<div class="spr-big ${x.retSince>=0?'up':'down'}">${sg(x.retSince)}%</div>`; cap = `진입 후 수익 · 평균 대비 ${sg(x.excessSince)}%p`;
+      sub = `${x.sigDate.slice(4,6)}/${x.sigDate.slice(6)} 신호(${x.together}개 동시) · 남은 보유 ${x.left}거래일`;
+      plan = `<span>진입 ${won(x.entry)}원</span><span>손절 ${won(x.stop)}원</span><span>현재 ${won(x.price)}원</span>`;
+    } else {
+      chip = `<span class="spr-chip wait">${x.near?'돌파 대기':'다음 후보'}</span>`;
+      big = `<div class="spr-big">${sg(x.gapHi)}%</div>`; cap = `120일 고점까지`;
+      sub = `3개월 상대강도 상위 ${x.rsTop}% · 3개월 ${sg(x.r63)}% · 고점 ${won(x.hi120)}원`;
+    }
+    return `<button class="spr-item" data-code="${E(x.code)}" data-name="${E(x.name)}">
+      <div class="spr-r1"><span class="spr-name">${E(x.name)}</span>${chip}<span class="spr-today ${x.r1>=0?'up':'down'}">오늘 ${sg(x.r1,2)}%</span></div>
+      <div class="spr-r2"><div>${big}<div class="spr-cap">${cap}</div></div>${mini(x.chart)}</div>
+      <div class="spr-sub">${sub}</div>${plan?`<div class="spr-plan">${plan}</div>`:''}
+    </button>`;
+  }
+
+  function render(){
+    const box=document.getElementById('sprout-radar'); if(!box||!R) return;
+    const d=R.asOf, up=R.market.up60;
+    const sec=(t,sub,items,kind,empty)=>`<div class="spr-sec"><div class="spr-h"><span>${t}</span><span class="spr-n">${items.length}</span></div>${sub?`<div class="spr-hsub">${sub}</div>`:''}${items.length?items.map(x=>card(x,kind)).join(''):`<div class="spr-empty">${empty}</div>`}</div>`;
+    const near=R.waiting.filter(x=>x.near), next=R.waiting.filter(x=>!x.near).slice(0,5);
+    box.innerHTML=`<div class="spr-card">
+      <div class="spr-top"><div><div class="spr-title">🌱 싹 레이더</div><div class="spr-date">${d.slice(0,4)}.${d.slice(4,6)}.${d.slice(6)} 기준 · 국내 업종·테마 ETF ${R.universe}개 · 차트 기반</div></div>
+        <span class="spr-mkt ${up?'on':'off'}">ETF평균 60일선 ${sg(R.market.vs60)}%</span></div>
+      <div class="spr-msg">${up
+        ? '신호가 켜지는 장입니다. <b>센 ETF가 한 달 쉬었다가 다시 신고가를 뚫는 날</b>, 특히 <b>같은 테마 ETF 여러 개가 같이 뚫는 날</b>이 시장이 막 알아채는 순간입니다.'
+        : '지금은 신호가 꺼진 장입니다. ETF 평균이 60일선 아래일 땐 신고가 돌파가 과거에 잘 안 먹혔습니다(20일 -1.1%). 아래 <b>다음 후보</b>를 지켜보다가, 평균이 60일선을 되찾으면 신호가 다시 켜집니다.'}</div>
+      <div class="spr-how"><div><b>① 센 놈</b>3개월 상대강도 상위 20%</div><div><b>② 쉬었다가</b>최근 20거래일 신고가 없음</div><div><b>③ 다시 뚫음</b>120일 신고가 돌파</div></div>
+      ${sec('오늘 돌파', 'S = 같은 날 3개↑ 동시 돌파(테마 확산) · A = 2개 · B = 단독(관찰)', R.today, 'today', up?'오늘 새로 뚫은 싹 없음':'시장 필터로 신호 꺼짐')}
+      ${sec('보유 구간', `최근 ${R.rules.hold}거래일 안에 뜬 신호 · 진입은 신호 다음날 종가 기준`, R.holding, 'hold', '보유 구간 싹 없음')}
+      ${sec('돌파 대기', '고점 5% 이내까지 올라온 센 ETF · 뚫는 날 신호', near, 'wait', '고점 근처까지 올라온 후보 없음')}
+      ${next.length?sec('다음 후보', '3개월 상대강도 상위인데 아직 고점과 거리가 있는 ETF', next, 'wait', ''):''}
+      <div class="spr-sec"><div class="spr-h"><span>최근 60일 신호일</span></div><div class="spr-hsub">동시 돌파 개수 · 많을수록 테마 전체가 움직인 날</div>
+        ${R.recent.length?`<div class="spr-recent">${R.recent.map(r=>`<span>${r.d.slice(4,6)}/${r.d.slice(6)} · ${r.n}개</span>`).join('')}</div>`:'<div class="spr-empty">최근 60일엔 신호가 없었습니다.</div>'}</div>
+      <div class="spr-foot">검증(2024.10~2026.10, ETF 279개, 다음날 종가 진입, ETF 평균 대비): 동시 3개↑ 날 20일 +4.3%(승률 69%)·40일 +9.9%, 2개 +4.1%·+7.8%, 단독 +0.5%·+1.6%. 예전 싹 스코어 TOP10은 20일 -0.4%로 효과가 없었습니다. 같은 테마 ETF가 겹쳐 독립 표본은 적고(S일 29일), 상장폐지 ETF가 빠져 있어 실제보다 좋게 나왔을 수 있습니다. 매매 판단은 직접.</div>
+    </div>`;
+    box.querySelectorAll('.spr-item').forEach(el=>el.onclick=()=>{
+      const code=el.dataset.code;
+      if(typeof DATA!=='undefined' && DATA.find && DATA.find(x=>x.code===code)) openDetailModal(code);
+      else window.open('https://finance.naver.com/item/main.naver?code='+code,'_blank');
+    });
+  }
+
+  async function load(){
+    const box=document.getElementById('sprout-radar'); if(!box) return;
+    try{
+      const r=await fetch('/.netlify/functions/sprouts',{cache:'no-cache'}); const j=await r.json();
+      if(!r.ok||j.error) throw new Error(j.error||('HTTP '+r.status));
+      R=j; render();
+    }catch(e){ box.innerHTML=`<div class="spr-card"><div class="spr-empty">싹 레이더를 못 불러왔습니다 (${E(e.message)}). 잠시 뒤 새로고침하세요.</div></div>`; }
+  }
+  window.loadSproutRadar=load;
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',load); else load();
+  const rb=document.getElementById('refresh'); if(rb) rb.addEventListener('click',load);
+
+  /* ===== 상세 창 차트: 1년 가격 · 60일선 · 120일 고점 ===== */
+  window.renderEtfChart = async function(code, mount){
+    if(!mount) return;
+    mount.innerHTML='<div class="mchart"><div class="mchart-h"><b>차트</b><span>불러오는 중…</span></div></div>';
+    try{
+      const url='https://fchart.stock.naver.com/sise.nhn?symbol='+code+'&timeframe=day&count=260&requestType=0';
+      let r=await fetch('/.netlify/functions/proxy?url='+encodeURIComponent(url));
+      if(!r.ok) r=await fetch('https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(url));
+      const txt=new TextDecoder('euc-kr').decode(await r.arrayBuffer());
+      const b=[...txt.matchAll(/data="([^"]+)"/g)].map(m=>{const a=m[1].split('|');return {d:a[0],h:+a[2],l:+a[3],c:+a[4]};});
+      if(b.length<30) throw new Error('일봉 부족');
+      const c=b.map(x=>x.c), n=c.length, L=n-1;
+      const ma=(k,t)=>{ if(t<k-1) return null; let s=0; for(let j=t-k+1;j<=t;j++) s+=c[j]; return s/k; };
+      let hi=0; for(let j=Math.max(0,L-120);j<L;j++) hi=Math.max(hi,b[j].h);
+      let lastNh=-1; for(let t=Math.max(121,0);t<=L;t++){ let h=0; for(let j=t-120;j<t;j++) h=Math.max(h,b[j].h); if(c[t]>h) lastNh=t; }
+      const W=600,H=170, all=c.concat(hi?[hi]:[]), mn=Math.min(...b.map(x=>x.l)), mx=Math.max(...b.map(x=>x.h),hi), rg=(mx-mn)||1;
+      const X=i=>(i/(n-1)*W).toFixed(1), Y=v=>(H-6-(v-mn)/rg*(H-14)).toFixed(1);
+      const pl=arr=>arr.map((v,i)=>v==null?null:`${X(i)},${Y(v)}`).filter(Boolean).join(' ');
+      const m20=c.map((_,i)=>ma(20,i)), m60=c.map((_,i)=>ma(60,i));
+      const up=c[L]>=c[0];
+      const gap=hi?(c[L]/hi-1)*100:null, v60=m60[L]?(c[L]/m60[L]-1)*100:null;
+      const daysSince = lastNh>=0 ? L-lastNh : null;
+      mount.innerHTML=`<div class="mchart">
+        <div class="mchart-h"><b>최근 1년</b><span>${b[0].d.slice(2,4)}.${b[0].d.slice(4,6)} ~ ${b[L].d.slice(2,4)}.${b[L].d.slice(4,6)}.${b[L].d.slice(6)}</span></div>
+        <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-label="1년 가격 차트">
+          ${hi?`<line x1="${X(Math.max(0,L-120))}" x2="${W}" y1="${Y(hi)}" y2="${Y(hi)}" stroke="var(--up)" stroke-width="1.5" stroke-dasharray="6 5" vector-effect="non-scaling-stroke"/>`:''}
+          <polyline points="${pl(m60)}" fill="none" stroke="#8b95a1" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
+          <polyline points="${pl(m20)}" fill="none" stroke="#fe9800" stroke-width="1.2" opacity=".8" vector-effect="non-scaling-stroke"/>
+          <polyline points="${pl(c)}" fill="none" stroke="${up?'var(--up)':'var(--down)'}" stroke-width="2.2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+        </svg>
+        <div class="mchart-legend"><span><i style="border-color:${up?'var(--up)':'var(--down)'}"></i>종가</span><span><i style="border-color:#fe9800"></i>20일선</span><span><i style="border-color:#8b95a1"></i>60일선</span><span><i style="border-color:var(--up);border-top-style:dashed"></i>120일 고점</span></div>
+        <div class="mchart-stats">
+          <div>120일 고점까지<b class="${gap>=0?'up':''}">${gap==null?'—':(gap>=0?'돌파 중':sg(gap)+'%')}</b></div>
+          <div>60일선 대비<b class="${v60>=0?'up':'down'}">${v60==null?'—':sg(v60)+'%'}</b></div>
+          <div>마지막 신고가<b>${daysSince==null?'1년 내 없음':daysSince===0?'오늘':daysSince+'일 전'}</b></div>
+        </div></div>`;
+    }catch(e){ mount.innerHTML=`<div class="mchart"><div class="mchart-h"><b>차트</b><span>못 불러옴 (${E(e.message)})</span></div></div>`; }
+  };
+})();
+</script>
 </body>
 </html>

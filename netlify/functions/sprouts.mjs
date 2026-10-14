@@ -111,7 +111,7 @@ export default async () => {
           left: Math.max(0, HOLD - (L - a)), stopHit: e.C[L] < entry * (1 - STOP) }));
         continue;
       }
-      if (!e.nh[L] && e.hi[L] && e.C[L] >= e.hi[L] * 0.95 && fresh(e, L) && rsPct[L][e.code] <= 0.2) waiting.push(card(e, {}));
+      if (!e.nh[L] && e.hi[L] && fresh(e, L) && rsPct[L][e.code] <= 0.2) waiting.push(card(e, { near: e.C[L] >= e.hi[L] * 0.95 }));
     }
     today.sort((a, b) => a.rsTop - b.rsTop);
     holding.sort((a, b) => (a.grade > b.grade ? 1 : a.grade < b.grade ? -1 : a.daysAgo - b.daysAgo));
